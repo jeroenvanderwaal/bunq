@@ -2,7 +2,6 @@ import React from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import List, {
     ListItem,
-    ListSubheader,
     ListItemText,
     ListItemIcon,
     ListItemSecondaryAction
@@ -13,9 +12,11 @@ import AccountBalanceIcon from "material-ui-icons/AccountBalance";
 import PhoneIcon from "material-ui-icons/Phone";
 import EmailIcon from "material-ui-icons/Email";
 import PersonIcon from "material-ui-icons/Person";
+import LinkIcon from "material-ui-icons/Link";
 
 import LazyAttachmentImage from "../../Components/AttachmentImage/LazyAttachmentImage";
 import AccountQRFullscreen from "../../Components/QR/AccountQRFullscreen";
+import UploadFullscreen from "../../Components/FileUpload/UploadFullscreen";
 import { formatMoney } from "../../Helpers/Utils";
 
 const styles = {
@@ -28,7 +29,9 @@ const styles = {
 class AccountCard extends React.Component {
     constructor(props, context) {
         super(props, context);
-        this.state = {};
+        this.state = {
+            displayUploadScreen: false
+        };
     }
 
     copiedValue = type => callback => {
@@ -47,9 +50,23 @@ class AccountCard extends React.Component {
 
         return (
             <Paper>
+                <UploadFullscreen
+                    BunqJSClient={this.props.BunqJSClient}
+                    open={this.state.displayUploadScreen}
+                    handleRequestClose={_ =>
+                        this.setState({
+                            displayUploadScreen: false
+                        })}
+                />
                 <List>
                     <ListItem>
-                        <Avatar style={styles.avatar}>
+                        <Avatar
+                            style={styles.avatar}
+                            onClick={_ =>
+                                this.setState({
+                                    displayUploadScreen: true
+                                })}
+                        >
                             <LazyAttachmentImage
                                 width={60}
                                 BunqJSClient={this.props.BunqJSClient}
@@ -78,6 +95,9 @@ class AccountCard extends React.Component {
                                 break;
                             case "IBAN":
                                 icon = <AccountBalanceIcon />;
+                                break;
+                            case "URL":
+                                icon = <LinkIcon />;
                                 break;
                         }
 

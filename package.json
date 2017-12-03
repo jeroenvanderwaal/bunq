@@ -111,6 +111,7 @@
     "react": "^16.0.0",
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "16.0.0",
+    "react-dropzone": "^4.2.3",
     "react-helmet": "^5.0.2",
     "react-loadable": "^3.2.2",
     "react-number-format": "^v3.0.0-beta3",
