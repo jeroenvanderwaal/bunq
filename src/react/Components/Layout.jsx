@@ -234,7 +234,7 @@ class Layout extends React.Component {
 
         // setup finished with no errors
         this.props.applicationSetStatus("");
-        this.props.usersUpdate();
+        this.props.usersUpdate(true);
     };
 
     render() {
