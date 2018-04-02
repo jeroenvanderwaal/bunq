@@ -1,14 +1,15 @@
 import React from "react";
+import { translate } from "react-i18next";
 import { connect } from "react-redux";
 
 import TextField from "material-ui/TextField";
-import { InputLabel } from "material-ui/Input";
-import Button from "material-ui/Button";
-import Typography from "material-ui/Typography";
 import { FormControl } from "material-ui/Form";
 
 import AccountSelectorDialog from "../../Components/FormFields/AccountSelectorDialog";
 import MoneyFormatInput from "../../Components/FormFields/MoneyFormatInput";
+import TypographyTranslate from "../../Components/TranslationHelpers/Typography";
+import ButtonTranslate from "../../Components/TranslationHelpers/Button";
+
 import { openSnackbar } from "../../Actions/snackbar";
 import { bunqMeTabSend } from "../../Actions/bunq_me_tab";
 import ConfirmationDialog from "./ConfirmationDialog";
@@ -26,7 +27,7 @@ const styles = {
     }
 };
 
-class BunqMeTab extends React.Component {
+class BunqMeTabForm extends React.Component {
     constructor(props, context) {
         super(props, context);
         this.state = {
@@ -59,7 +60,7 @@ class BunqMeTab extends React.Component {
     componentDidMount() {
         // set the current account selected on the dashboard as the active one
         this.props.accounts.map((account, accountKey) => {
-            if (this.props.selectedAccount === account.MonetaryAccountBank.id) {
+            if (this.props.selectedAccount === account.id) {
                 this.setState({ selectedAccount: accountKey });
             }
         });
@@ -148,7 +149,7 @@ class BunqMeTab extends React.Component {
             setRedirectUrl,
             redirectUrl
         } = this.state;
-        const account = accounts[selectedAccount].MonetaryAccountBank;
+        const account = accounts[selectedAccount];
         const userId = user.id;
 
         const amountInfo = {
@@ -172,11 +173,14 @@ class BunqMeTab extends React.Component {
 
     render() {
         const { selectedAccount, description, amount } = this.state;
+        const t = this.props.t;
         const account = this.props.accounts[selectedAccount];
 
         return [
             <div style={styles.paper}>
-                <Typography type="headline">Create new Bunq.me request</Typography>
+                <TypographyTranslate variant="headline">
+                    Create new bunq.me request
+                </TypographyTranslate>
 
                 <AccountSelectorDialog
                     value={this.state.selectedAccount}
@@ -189,7 +193,7 @@ class BunqMeTab extends React.Component {
                     fullWidth
                     error={this.state.descriptionError}
                     id="description"
-                    label="Description"
+                    label={t("Description")}
                     value={this.state.description}
                     onChange={this.handleChange("description")}
                     margin="normal"
@@ -213,25 +217,23 @@ class BunqMeTab extends React.Component {
                     />
                 </FormControl>
 
-                <Button
-                    raised
+                <ButtonTranslate
+                    variant="raised"
                     color="primary"
                     disabled={
-                        !this.state.validForm ||
-                        this.props.bunqMeTabLoading
+                        !this.state.validForm || this.props.bunqMeTabLoading
                     }
                     style={styles.payButton}
                     onClick={this.openModal}
                 >
                     Create request
-                </Button>
+                </ButtonTranslate>
             </div>,
             <ConfirmationDialog
                 closeModal={this.closeModal}
                 sendInquiry={this.sendInquiry}
                 confirmModalOpen={this.state.confirmModalOpen}
                 description={description}
-                account={<account className="MonetaryAccountBank">  </account>}
                 amount={amount}
             />
         ];
@@ -265,4 +267,6 @@ const mapDispatchToProps = (dispatch, props) => {
     };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(BunqMeTab);
+export default connect(mapStateToProps, mapDispatchToProps)(
+    translate("translations")(BunqMeTabForm)
+);

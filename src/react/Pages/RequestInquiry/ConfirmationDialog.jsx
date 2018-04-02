@@ -1,5 +1,6 @@
 import React from "react";
 import Button from "material-ui/Button";
+import Divider from "material-ui/Divider";
 import List, { ListItem, ListItemText } from "material-ui/List";
 import Dialog, {
     DialogActions,
@@ -12,23 +13,49 @@ export default class ConfirmationDialog extends React.Component {
     render() {
         const {
             confirmModalOpen,
-            account,
-            targetType,
             description,
-            ibanName,
+            account,
+            targets,
             amount,
-            target
+            t
         } = this.props;
 
         if (!confirmModalOpen) {
             return null;
         }
 
+        // create a list of ListItems with our targets
+        const confirmationModelTargets = targets.map(targetItem => {
+            let primaryText = "";
+            let secondaryText = "";
+
+            switch (targetItem.type) {
+                case "PHONE":
+                    primaryText = `${t("Phone")}: ${targetItem.value}`;
+                    break;
+                case "EMAIL":
+                    primaryText = `${t("Email")}: ${targetItem.value}`;
+                    break;
+                default:
+                    return null;
+            }
+
+            return [
+                <ListItem>
+                    <ListItemText
+                        primary={primaryText}
+                        secondary={secondaryText}
+                    />
+                </ListItem>,
+                <Divider />
+            ];
+        });
+
         return (
             <Dialog
                 open={confirmModalOpen}
                 keepMounted
-                onRequestClose={this.props.closeModal}
+                onClose={this.closeModal}
             >
                 <DialogTitle>Confirm the request</DialogTitle>
                 <DialogContent>
@@ -36,52 +63,49 @@ export default class ConfirmationDialog extends React.Component {
                         <ListItem>
                             <ListItemText
                                 primary="To"
-                                secondary={`${account.description}  ${formatMoney(
-                                    account.balance.value
-                                )}`}
+                                secondary={`${account.description} ${account
+                                    .balance.value}`}
                             />
                         </ListItem>
                         <ListItem>
                             <ListItemText
-                                primary="Description"
-                                secondary={description}
+                                primary={t("Description")}
+                                secondary={
+                                    description.length <= 0 ? (
+                                        t("None")
+                                    ) : (
+                                        description
+                                    )
+                                }
                             />
                         </ListItem>
                         <ListItem>
                             <ListItemText
-                                primary="Amount"
-                                secondary={formatMoney(amount)}
+                                primary={t("Amount")}
+                                secondary={`${formatMoney(amount)}`}
                             />
                         </ListItem>
                         <ListItem>
-                            <ListItemText
-                                primary="To"
-                                secondary={(() => {
-                                    switch (targetType) {
-                                        case "PHONE":
-                                            return `Phone: ${target}`;
-                                        case "EMAIL":
-                                            return `Email: ${target}`;
-                                    }
-                                })()}
-                            />
+                            <ListItemText primary={t("Targets") + ": "} />
                         </ListItem>
+                        <Divider />
+                        {confirmationModelTargets}
                     </List>
                 </DialogContent>
                 <DialogActions>
                     <Button
-                        raised
+                        variant="raised"
                         onClick={this.props.closeModal}
-                        color="accent"
+                        color="secondary"
                     >
-                        Cancel
+                        {t("Cancel")}
                     </Button>
                     <Button
-                        raised
+                        variant="raised"
                         onClick={this.props.sendInquiry}
                         color="primary"
                     >
-                        Confirm
+                        {t("Confirm")}
                     </Button>
                 </DialogActions>
             </Dialog>

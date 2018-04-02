@@ -1,7 +1,9 @@
 import React from "react";
 import Typography from "material-ui/Typography";
 import Logger from "../Helpers/Logger";
-import Button from "material-ui/Button";
+
+import TranslateButton from "./TranslationHelpers/Button";
+import TranslateTypography from "./TranslationHelpers/Typography";
 
 export default class ErrorBoundary extends React.Component {
     constructor(props) {
@@ -26,11 +28,11 @@ export default class ErrorBoundary extends React.Component {
             // You can render any custom fallback UI
             return (
                 <div style={{ marginTop: 30 }}>
-                    <Typography type="display1">
+                    <TranslateTypography variant="display1">
                         Something went wrong!
-                    </Typography>
+                    </TranslateTypography>
                     <Typography
-                        type="body2"
+                        variant="body2"
                         component="summary"
                         style={{ whiteSpace: "pre-wrap" }}
                     >
@@ -38,13 +40,13 @@ export default class ErrorBoundary extends React.Component {
                     </Typography>
                     <br />
                     {this.props.recoverableError === true ? (
-                        <Button
-                            raised
+                        <TranslateButton
+                            variant="raised"
                             color="primary"
                             onClick={this.clearError}
                         >
                             Return to dashboard
-                        </Button>
+                        </TranslateButton>
                     ) : null}
                 </div>
             );

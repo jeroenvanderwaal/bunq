@@ -19,19 +19,33 @@ let config = {
         path: BUILD_DIR,
         filename: OUTPUT_DIR + "[name].js",
         publicPath: "react/",
-        chunkFilename: OUTPUT_DIR + "[name].[chunkhash].bundle.js"
+        chunkFilename: OUTPUT_DIR + "[name].bundle.js"
     },
     resolve: {
         extensions: [".tsx", ".ts", ".js", ".jsx", ".json"],
         modules: ["node_modules", path.resolve(__dirname, "./src")]
     },
+    mode: DEVELOPMENT ? "development" : "production",
     devtool: DEVELOPMENT ? "source-map" : false,
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                styles: {
+                    name: "styles",
+                    test: /\.css$/,
+                    chunks: "all",
+                    enforce: true
+                }
+            }
+        }
+    },
     plugins: plugins({ BUILD_DIR, OUTPUT_DIR, PRODUCTION, DEVELOPMENT }),
     module: {
         rules: rules
     },
     node: {
         console: false,
+        __dirname: false,
         fs: "empty",
         net: "empty",
         tls: "empty"

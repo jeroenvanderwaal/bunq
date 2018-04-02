@@ -1,4 +1,5 @@
 import React from "react";
+import { translate } from "react-i18next";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
 import Redirect from "react-router-dom/Redirect";
@@ -7,15 +8,20 @@ import Paper from "material-ui/Paper";
 import Button from "material-ui/Button";
 import List, { ListItem, ListItemText } from "material-ui/List";
 import Divider from "material-ui/Divider";
-import ArrowBackIcon from "material-ui-icons/ArrowBack";
 import CircularProgress from "material-ui/Progress/CircularProgress";
 import Typography from "material-ui/Typography";
 
-import { formatMoney, humanReadableDate } from "../Helpers/Utils";
-import { requestInquiryText } from "../Helpers/StatusTexts";
+import ArrowBackIcon from "material-ui-icons/ArrowBack";
+import HelpIcon from "material-ui-icons/Help";
+
+import ExportDialog from "../Components/ExportDialog";
+import TranslateButton from "../Components/TranslationHelpers/Button";
 import MoneyAmountLabel from "../Components/MoneyAmountLabel";
 import TransactionHeader from "../Components/TransactionHeader";
+import CategorySelector from "../Components/Categories/CategorySelector";
 
+import { formatMoney, humanReadableDate } from "../Helpers/Utils";
+import { requestInquiryText } from "../Helpers/StatusTexts";
 import { requestInquiryCancel } from "../Actions/request_inquiry";
 import { requestInquiryUpdate } from "../Actions/request_inquiry_info";
 
@@ -38,7 +44,7 @@ const styles = {
 class RequestInquiryInfo extends React.Component {
     constructor(props, context) {
         super(props, context);
-        this.state = {};
+        this.state = { displayExport: false };
     }
 
     componentDidMount() {
@@ -56,6 +62,8 @@ class RequestInquiryInfo extends React.Component {
 
     componentWillUpdate(nextProps, nextState) {
         if (
+            nextProps.user &&
+            nextProps.user.id &&
             this.props.initialBunqConnect &&
             this.props.match.params.requestInquiryId !==
                 nextProps.match.params.requestInquiryId
@@ -87,7 +95,8 @@ class RequestInquiryInfo extends React.Component {
             accountsSelectedAccount,
             requestInquiryInfo,
             requestInquiryLoading,
-            requestInquiryInfoLoading
+            requestInquiryInfoLoading,
+            t
         } = this.props;
         const paramAccountId = this.props.match.params.accountId;
 
@@ -116,7 +125,7 @@ class RequestInquiryInfo extends React.Component {
             const paymentDate = humanReadableDate(requestInquiry.updated);
             const paymentAmount = requestInquiry.amount_inquired.value;
             const formattedPaymentAmount = formatMoney(paymentAmount);
-            const requestInquiryLabel = requestInquiryText(requestInquiry);
+            const requestInquiryLabel = requestInquiryText(requestInquiry, t);
 
             content = (
                 <Grid
@@ -129,6 +138,7 @@ class RequestInquiryInfo extends React.Component {
                         BunqJSClient={this.props.BunqJSClient}
                         to={requestInquiry.counterparty_alias}
                         from={requestInquiry.user_alias_created}
+                        user={this.props.user}
                     />
 
                     <Grid item xs={12}>
@@ -143,7 +153,7 @@ class RequestInquiryInfo extends React.Component {
 
                         <Typography
                             style={{ textAlign: "center" }}
-                            type={"body1"}
+                            variant={"body1"}
                         >
                             {requestInquiryLabel}
                         </Typography>
@@ -166,7 +176,7 @@ class RequestInquiryInfo extends React.Component {
                             <Divider />
                             <ListItem>
                                 <ListItemText
-                                    primary={"Date"}
+                                    primary={t("Date")}
                                     secondary={paymentDate}
                                 />
                             </ListItem>
@@ -185,21 +195,26 @@ class RequestInquiryInfo extends React.Component {
                         {requestInquiry.status === "PENDING" ? (
                             <Grid container spacing={16} justify="center">
                                 <Grid item xs={12} sm={6}>
-                                    <Button
-                                        raised
+                                    <TranslateButton
+                                        variant="raised"
                                         disabled={
                                             requestInquiryLoading ||
                                             requestInquiryInfoLoading
                                         }
                                         onClick={this.cancelInquiry}
-                                        color="accent"
+                                        color="secondary"
                                         style={styles.button}
                                     >
                                         Cancel
-                                    </Button>
+                                    </TranslateButton>
                                 </Grid>
                             </Grid>
                         ) : null}
+
+                        <CategorySelector
+                            type={"RequestInquiry"}
+                            item={requestInquiryInfo}
+                        />
                     </Grid>
                 </Grid>
             );
@@ -208,7 +223,7 @@ class RequestInquiryInfo extends React.Component {
         return (
             <Grid container spacing={24}>
                 <Helmet>
-                    <title>{`BunqDesktop - Request Info`}</title>
+                    <title>{`BunqDesktop - ${t("Request Info")}`}</title>
                 </Helmet>
 
                 <Grid item xs={12} sm={2}>
@@ -219,8 +234,27 @@ class RequestInquiryInfo extends React.Component {
                         <ArrowBackIcon />
                     </Button>
                 </Grid>
+
                 <Grid item xs={12} sm={8}>
                     <Paper style={styles.paper}>{content}</Paper>
+                </Grid>
+
+                <Grid item xs={12} sm={2} style={{ textAlign: "right" }}>
+                    <ExportDialog
+                        closeModal={event =>
+                            this.setState({ displayExport: false })}
+                        title={t("Export info")}
+                        open={this.state.displayExport}
+                        object={this.props.requestInquiryInfo}
+                    />
+
+                    <Button
+                        style={styles.button}
+                        onClick={event =>
+                            this.setState({ displayExport: true })}
+                    >
+                        <HelpIcon />
+                    </Button>
                 </Grid>
             </Grid>
         );
@@ -261,4 +295,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(RequestInquiryInfo);
+export default connect(mapStateToProps, mapDispatchToProps)(
+    translate("translations")(RequestInquiryInfo)
+);

@@ -11,7 +11,7 @@ import Login from "./Pages/Login/Login";
 const NotFound = CL(() =>
     import(/* webpackChunkName: "notfound" */ "./Pages/NotFound")
 );
-const Pay = CL(() => import(/* webpackChunkName: "pay" */ "./Pages/Pay"));
+const Pay = CL(() => import(/* webpackChunkName: "pay" */ "./Pages/Pay/Pay"));
 const BunqMeTab = CL(() =>
     import(/* webpackChunkName: "bunqmetab" */ "./Pages/BunqMeTab/BunqMeTab")
 );
@@ -19,7 +19,7 @@ const RequestInquiry = CL(() =>
     import(/* webpackChunkName: "requestinquiry" */ "./Pages/RequestInquiry/RequestInquiry")
 );
 const RequestResponseInfo = CL(() =>
-    import(/* webpackChunkName: "requestresponseinfo" */ "./Pages/RequestResponseInfo")
+    import(/* webpackChunkName: "requestresponseinfo" */ "./Pages/RequestResponseInfo/RequestResponseInfo")
 );
 const RequestInquiryInfo = CL(() =>
     import(/* webpackChunkName: "requestinquiryinfo" */ "./Pages/RequestInquiryInfo")
@@ -36,6 +36,33 @@ const ApplicationInfo = CL(() =>
 const AccountInfo = CL(() =>
     import(/* webpackChunkName: "accountinfo" */ "./Pages/AccountInfo")
 );
+const AddAccount = CL(() =>
+    import(/* webpackChunkName: "addaccount" */ "./Pages/AddAccount")
+);
+const Stats = CL(() =>
+    import(/* webpackChunkName: "stats" */ "./Pages/Stats/Stats")
+);
+const CategoryDashboard = CL(() =>
+    import(/* webpackChunkName: "category_dashboard" */ "./Pages/CategoryDashboard/CategoryDashboard")
+);
+const Card = CL(() =>
+    import(/* webpackChunkName: "cards" */ "./Pages/Cards/Card")
+);
+const DebugPage = CL(() =>
+    import(/* webpackChunkName: "debug" */ "./Pages/DebugPage")
+);
+const Settings = CL(() =>
+    import(/* webpackChunkName: "debug" */ "./Pages/Settings")
+);
+const Exports = CL(() =>
+    import(/* webpackChunkName: "exports" */ "./Pages/Exports")
+);
+// const RuleDashboard = CL(() =>
+//     import(/* webpackChunkName: "rules_dashboard" */ "./Pages/RuleDashboard/RuleDashboard")
+// );
+// const RulePage = CL(() =>
+//     import(/* webpackChunkName: "rules_page" */ "./Pages/RulePage/RulePage")
+// );
 
 // router react component
 export default class Routes extends React.Component {
@@ -166,6 +193,87 @@ export default class Routes extends React.Component {
                                 />
                             )}
                         />
+                        <PrivateRoute
+                            path="/add-account"
+                            apiKey={this.props.apiKey}
+                            userType={this.props.userType}
+                            derivedPassword={this.props.derivedPassword}
+                            render={props => (
+                                <AddAccount
+                                    {...props}
+                                    {...this.props.childProps}
+                                />
+                            )}
+                        />
+
+                        <PrivateRoute
+                            path="/stats"
+                            apiKey={this.props.apiKey}
+                            userType={this.props.userType}
+                            derivedPassword={this.props.derivedPassword}
+                            render={props => (
+                                <Stats {...props} {...this.props.childProps} />
+                            )}
+                        />
+
+                        <PrivateRoute
+                            path="/category-dashboard"
+                            apiKey={this.props.apiKey}
+                            userType={this.props.userType}
+                            derivedPassword={this.props.derivedPassword}
+                            render={props => (
+                                <CategoryDashboard
+                                    {...props}
+                                    {...this.props.childProps}
+                                />
+                            )}
+                        />
+
+                        <PrivateRoute
+                            path="/card"
+                            apiKey={this.props.apiKey}
+                            userType={this.props.userType}
+                            derivedPassword={this.props.derivedPassword}
+                            render={props => (
+                                <Card {...props} {...this.props.childProps} />
+                            )}
+                        />
+
+                        <PrivateRoute
+                            path="/exports"
+                            apiKey={this.props.apiKey}
+                            userType={this.props.userType}
+                            derivedPassword={this.props.derivedPassword}
+                            render={props => (
+                                <Exports {...props} {...this.props.childProps} />
+                            )}
+                        />
+
+                        {/*<PrivateRoute*/}
+                        {/*path="/rules-dashboard"*/}
+                        {/*apiKey={this.props.apiKey}*/}
+                        {/*userType={this.props.userType}*/}
+                        {/*derivedPassword={this.props.derivedPassword}*/}
+                        {/*render={props => (*/}
+                        {/*<RuleDashboard*/}
+                        {/*{...props}*/}
+                        {/*{...this.props.childProps}*/}
+                        {/*/>*/}
+                        {/*)}*/}
+                        {/*/>*/}
+
+                        {/*<PrivateRoute*/}
+                        {/*path="/rule-page/:ruleId"*/}
+                        {/*apiKey={this.props.apiKey}*/}
+                        {/*userType={this.props.userType}*/}
+                        {/*derivedPassword={this.props.derivedPassword}*/}
+                        {/*render={props => (*/}
+                        {/*<RulePage*/}
+                        {/*{...props}*/}
+                        {/*{...this.props.childProps}*/}
+                        {/*/>*/}
+                        {/*)}*/}
+                        {/*/>*/}
 
                         <Route
                             path="/login"
@@ -178,6 +286,26 @@ export default class Routes extends React.Component {
                             path="/application-info"
                             render={props => (
                                 <ApplicationInfo
+                                    {...props}
+                                    {...this.props.childProps}
+                                />
+                            )}
+                        />
+
+                        <Route
+                            path="/debug-page"
+                            render={props => (
+                                <DebugPage
+                                    {...props}
+                                    {...this.props.childProps}
+                                />
+                            )}
+                        />
+
+                        <Route
+                            path="/settings"
+                            render={props => (
+                                <Settings
                                     {...props}
                                     {...this.props.childProps}
                                 />

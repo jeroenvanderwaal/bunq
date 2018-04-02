@@ -4,13 +4,15 @@ import {
     ListItemText,
     ListItemSecondaryAction
 } from "material-ui/List";
+import { translate } from "react-i18next";
 import Avatar from "material-ui/Avatar";
 import Divider from "material-ui/Divider";
 
 import { formatMoney } from "../../Helpers/Utils";
 import { requestInquiryText } from "../../Helpers/StatusTexts";
 import NavLink from "../../Components/Routing/NavLink";
-import LazyAttachmentImage from "../../Components/AttachmentImage/LazyAttachmentImage";
+import LazyAttachmentImage from "../AttachmentImage/LazyAttachmentImage";
+import CategoryIcons from "../Categories/CategoryIcons";
 import MoneyAmountLabel from "../MoneyAmountLabel";
 
 const styles = {
@@ -31,12 +33,12 @@ class RequestInquiryListItem extends React.Component {
         };
     }
 
-    shouldComponentUpdate(nextProps) {
-        return nextProps.requestInquiry.id !== this.props.requestInquiry.id;
-    }
+    // shouldComponentUpdate(nextProps) {
+    //     return nextProps.requestInquiry.id !== this.props.requestInquiry.id;
+    // }
 
     render() {
-        const { requestInquiry } = this.props;
+        const { requestInquiry, t } = this.props;
         if (requestInquiry.status === "ACCEPTED") {
             if (this.props.displayAcceptedRequests === false) {
                 // hide the request-response becuase a payment item exists
@@ -53,7 +55,7 @@ class RequestInquiryListItem extends React.Component {
         const displayName = requestInquiry.counterparty_alias.display_name;
         const paymentAmount = requestInquiry.amount_inquired.value;
         const formattedPaymentAmount = formatMoney(paymentAmount);
-        let paymentLabel = requestInquiryText(requestInquiry);
+        let paymentLabel = requestInquiryText(requestInquiry, t);
 
         return [
             <ListItem
@@ -69,7 +71,7 @@ class RequestInquiryListItem extends React.Component {
                     />
                 </Avatar>
                 <ListItemText primary={displayName} secondary={paymentLabel} />
-                <ListItemSecondaryAction>
+                <ListItemSecondaryAction style={{ marginTop: -16 }}>
                     <MoneyAmountLabel
                         style={styles.moneyAmountLabel}
                         info={requestInquiry}
@@ -78,6 +80,11 @@ class RequestInquiryListItem extends React.Component {
                         {formattedPaymentAmount}
                     </MoneyAmountLabel>
                 </ListItemSecondaryAction>
+                <CategoryIcons
+                    style={{ marginTop: 26 }}
+                    type={"RequestInquiry"}
+                    id={requestInquiry.id}
+                />
             </ListItem>,
             <Divider />
         ];
@@ -85,7 +92,8 @@ class RequestInquiryListItem extends React.Component {
 }
 
 RequestInquiryListItem.defaultProps = {
-    displayAcceptedRequests: true
+    displayAcceptedRequests: true,
+    minimalDisplay: false
 };
 
-export default RequestInquiryListItem;
+export default translate("translations")(RequestInquiryListItem);

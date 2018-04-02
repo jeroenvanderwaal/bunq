@@ -4,13 +4,16 @@ import {
     ListItemText,
     ListItemSecondaryAction
 } from "material-ui/List";
+import { translate } from "react-i18next";
 import Avatar from "material-ui/Avatar";
 import Divider from "material-ui/Divider";
 
 import { formatMoney } from "../../Helpers/Utils";
 import { requestResponseText } from "../../Helpers/StatusTexts";
+
 import NavLink from "../../Components/Routing/NavLink";
-import LazyAttachmentImage from "../../Components/AttachmentImage/LazyAttachmentImage";
+import LazyAttachmentImage from "../AttachmentImage/LazyAttachmentImage";
+import CategoryIcons from "../Categories/CategoryIcons";
 import MoneyAmountLabel from "../MoneyAmountLabel";
 
 const styles = {
@@ -31,12 +34,12 @@ class RequestResponseListItem extends React.Component {
         };
     }
 
-    shouldComponentUpdate(nextProps) {
-        return nextProps.requestResponse.id !== this.props.requestResponse.id;
-    }
+    // shouldComponentUpdate(nextProps) {
+    //     return nextProps.requestResponse.id !== this.props.requestResponse.id;
+    // }
 
     render() {
-        const { requestResponse } = this.props;
+        const { requestResponse, t } = this.props;
         if (requestResponse.status === "ACCEPTED") {
             if (this.props.displayAcceptedRequests === false) {
                 // hide the request-response becuase a payment item exists
@@ -53,7 +56,7 @@ class RequestResponseListItem extends React.Component {
         const displayName = requestResponse.counterparty_alias.display_name;
         const paymentAmount = requestResponse.amount_inquired.value;
         const formattedPaymentAmount = formatMoney(paymentAmount);
-        let paymentLabel = requestResponseText(requestResponse);
+        let paymentLabel = requestResponseText(requestResponse, t);
 
         return [
             <ListItem
@@ -69,7 +72,7 @@ class RequestResponseListItem extends React.Component {
                     />
                 </Avatar>
                 <ListItemText primary={displayName} secondary={paymentLabel} />
-                <ListItemSecondaryAction>
+                <ListItemSecondaryAction style={{ marginTop: -16 }}>
                     <MoneyAmountLabel
                         style={styles.moneyAmountLabel}
                         info={requestResponse}
@@ -78,6 +81,11 @@ class RequestResponseListItem extends React.Component {
                         {formattedPaymentAmount}
                     </MoneyAmountLabel>
                 </ListItemSecondaryAction>
+                <CategoryIcons
+                    style={{ marginTop: 26 }}
+                    type={"RequestResponse"}
+                    id={requestResponse.id}
+                />
             </ListItem>,
             <Divider />
         ];
@@ -85,7 +93,8 @@ class RequestResponseListItem extends React.Component {
 }
 
 RequestResponseListItem.defaultProps = {
-    displayAcceptedRequests: true
+    displayAcceptedRequests: true,
+    minimalDisplay: false
 };
 
-export default RequestResponseListItem;
+export default translate("translations")(RequestResponseListItem);

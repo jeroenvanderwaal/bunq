@@ -1,16 +1,18 @@
 import React from "react";
+import { translate } from "react-i18next";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
+import StickyBox from "react-sticky-box";
 import Paper from "material-ui/Paper";
 import Button from "material-ui/Button";
 import Grid from "material-ui/Grid";
 import Typography from "material-ui/Typography";
+
 import CombinedList from "../Components/CombinedList";
 import AccountList from "../Components/AccountList/AccountList";
-import StickyBox from "react-sticky-box";
+import LoadOlderButton from "../Components/LoadOlderButton";
 
 import { userLogin, userLogout } from "../Actions/user";
-import Logger from "../Helpers/Logger";
 
 const styles = {
     btn: {
@@ -36,32 +38,50 @@ class Dashboard extends React.Component {
     }
 
     render() {
+        const t = this.props.t;
+
+        const userTypes = Object.keys(this.props.users);
+
+        const switchUserText = t("Switch user");
+
+        const displayName = this.props.user.first_name
+            ? this.props.user.first_name
+            : this.props.user.name;
+
         return (
             <Grid container spacing={16}>
                 <Helmet>
-                    <title>{`BunqDesktop - Dashboard`}</title>
+                    <title>{`BunqDesktop - ${t("Dashboard")}`}</title>
                 </Helmet>
 
                 <Grid item xs={8} sm={10}>
-                    <Typography type="title" gutterBottom>
-                        Welcome {this.props.user.display_name}
+                    <Typography variant="title" gutterBottom>
+                        {`${t("Welcome")} ${displayName}`}
                     </Typography>
                 </Grid>
 
-                <Grid item xs={4} sm={2}>
-                    <Button style={styles.btn} onClick={this.props.logoutUser}>
-                        Switch User
-                    </Button>
-                </Grid>
+                {/* hide the switch button if only one user is set */}
+                {userTypes.length > 1 ? (
+                    <Grid item xs={4} sm={2}>
+                        <Button
+                            style={styles.btn}
+                            onClick={this.props.logoutUser}
+                        >
+                            {switchUserText}
+                        </Button>
+                    </Grid>
+                ) : null}
 
                 <Grid item xs={12} md={4}>
                     <StickyBox className={"sticky-container"}>
-                    <Paper>
-                        <AccountList
-                            BunqJSClient={this.props.BunqJSClient}
-                            initialBunqConnect={this.props.initialBunqConnect}
-                        />
-                    </Paper>
+                        <Paper>
+                            <AccountList
+                                BunqJSClient={this.props.BunqJSClient}
+                                initialBunqConnect={
+                                    this.props.initialBunqConnect
+                                }
+                            />
+                        </Paper>
                     </StickyBox>
                 </Grid>
 
@@ -72,6 +92,11 @@ class Dashboard extends React.Component {
                             initialBunqConnect={this.props.initialBunqConnect}
                         />
                     </Paper>
+
+                    <LoadOlderButton
+                        BunqJSClient={this.props.BunqJSClient}
+                        initialBunqConnect={this.props.initialBunqConnect}
+                    />
                 </Grid>
             </Grid>
         );
@@ -81,6 +106,7 @@ class Dashboard extends React.Component {
 const mapStateToProps = state => {
     return {
         user: state.user.user,
+        users: state.users.users,
         userType: state.user.user_type,
         userLoading: state.user.loading,
         usersLoading: state.users.loading
@@ -95,5 +121,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
             dispatch(userLogin(BunqJSClient, type, updated))
     };
 };
-
-export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);
+export default connect(mapStateToProps, mapDispatchToProps)(
+    translate("translations")(Dashboard)
+);

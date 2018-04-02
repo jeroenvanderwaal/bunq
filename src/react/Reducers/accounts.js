@@ -1,4 +1,6 @@
-const store = require("store");
+import store from "store";
+
+import { STORED_ACCOUNTS } from "../Actions/accounts";
 
 export const SELECTED_ACCOUNT_LOCAION = "BUNQDESKTOP_SELECTED_ACCOUNT";
 
@@ -16,6 +18,19 @@ export const defaultState = {
 export default (state = defaultState, action) => {
     switch (action.type) {
         case "ACCOUNTS_SET_INFO":
+            // store the data if we have access to the bunqjsclient
+            if (action.payload.BunqJSClient) {
+                action.payload.BunqJSClient.Session
+                    .storeEncryptedData(
+                        {
+                            items: action.payload.accounts
+                        },
+                        STORED_ACCOUNTS
+                    )
+                    .then(() => {})
+                    .catch(() => {});
+            }
+
             return {
                 ...state,
                 accounts: action.payload.accounts
@@ -29,12 +44,16 @@ export default (state = defaultState, action) => {
             };
 
         case "ACCOUNTS_IS_LOADING":
+        case "ACCOUNT_CREATE_IS_LOADING":
+        case "ACCOUNT_STATUS_IS_LOADING":
             return {
                 ...state,
                 loading: true
             };
 
         case "ACCOUNTS_IS_NOT_LOADING":
+        case "ACCOUNT_CREATE_IS_NOT_LOADING":
+        case "ACCOUNT_STATUS_IS_NOT_LOADING":
             return {
                 ...state,
                 loading: false
@@ -44,6 +63,7 @@ export default (state = defaultState, action) => {
         case "REGISTRATION_CLEAR_API_KEY":
         case "REGISTRATION_CLEAR_USER_INFO":
             store.remove(SELECTED_ACCOUNT_LOCAION);
+            store.remove(STORED_ACCOUNTS);
             return {
                 accounts: [],
                 selectedAccount: false,

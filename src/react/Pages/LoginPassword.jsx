@@ -1,14 +1,20 @@
 import React from "react";
+import { translate } from "react-i18next";
 import { Typography } from "material-ui";
 import { connect } from "react-redux";
 import Redirect from "react-router-dom/Redirect";
 import Helmet from "react-helmet";
+import store from "store";
 import Grid from "material-ui/Grid";
 import Input from "material-ui/Input";
 import Button from "material-ui/Button";
 import Card, { CardContent } from "material-ui/Card";
 import { CircularProgress } from "material-ui/Progress";
+
 import WarningIcon from "material-ui-icons/Warning";
+import LockIcon from "material-ui-icons/Lock";
+
+import TranslateButton from "../Components/TranslationHelpers/Button";
 
 import {
     registrationClearApiKey,
@@ -20,9 +26,14 @@ import {
 } from "../Actions/registration";
 
 const styles = {
+    wrapperContainer: {
+        height: "100%"
+    },
+    warningCard: {
+        marginTop: 16
+    },
     loginButton: {
-        width: "100%",
-        marginTop: 20
+        width: "100%"
     },
     clearButton: {
         width: "100%",
@@ -46,7 +57,9 @@ class LoginPassword extends React.Component {
         super(props, context);
         this.state = {
             password: "",
-            passwordValid: false
+            passwordValid: false,
+
+            hasReadWarning: !!store.get("HAS_READ_DEV_WARNING")
         };
     }
 
@@ -92,13 +105,19 @@ class LoginPassword extends React.Component {
         this.props.clearApiKey();
     };
 
+    ignoreWarning = event => {
+        store.set("HAS_READ_DEV_WARNING", true);
+        this.setState({ hasReadWarning: true });
+    };
+
     render() {
         const {
             status_message,
             registrationLoading,
             hasStoredApiKey,
             useNoPassword,
-            derivedPassword
+            derivedPassword,
+            t
         } = this.props;
 
         if (derivedPassword !== false) {
@@ -108,136 +127,146 @@ class LoginPassword extends React.Component {
         const buttonDisabled =
             this.state.passwordValid === false || registrationLoading === true;
 
-        const cardContent = registrationLoading ? (
-            <CardContent style={{ textAlign: "center" }}>
-                <Typography type="headline" component="h2">
-                    Loading
-                </Typography>
-                <CircularProgress size={50} />
-                <Typography type="subheading">{status_message}</Typography>
-            </CardContent>
-        ) : (
-            <CardContent>
-                <Typography type="headline" component="h2">
-                    {hasStoredApiKey ? (
-                        "Enter your password"
-                    ) : (
-                        "Enter a password"
-                    )}
-                </Typography>
+        let cardContent = null;
 
-                {hasStoredApiKey ? (
-                    <Typography type="body2">
-                        Enter your password to load your stored API key and
-                        session. Click the reset button to enter a new API key.
+        if (this.state.hasReadWarning === false) {
+            cardContent = (
+                <Card style={styles.warningCard}>
+                    <CardContent>
+                        <Typography variant="headline">
+                            <WarningIcon /> Caution!
+                        </Typography>
+                        <Typography variant="body2">
+                            {t("ActiveDevelopmentWarning")}
+                        </Typography>
+                        <br />
+                        <Typography variant="headline">
+                            <LockIcon /> Password
+                        </Typography>
+                        <Typography variant="body2">
+                            {t("PasswordWarningPart1")}
+                        </Typography>
+                        <Typography variant="body2">
+                            {t("PasswordWarningPart2")}
+                        </Typography>
+                        <div style={{ textAlign: "center" }}>
+                            <TranslateButton
+                                variant={"raised"}
+                                style={{ marginTop: 12 }}
+                                onClick={this.ignoreWarning}
+                            >
+                                Don't show this again
+                            </TranslateButton>
+                        </div>
+                    </CardContent>
+                </Card>
+            );
+        } else {
+            // actual content
+            cardContent = registrationLoading ? (
+                <CardContent style={{ textAlign: "center" }}>
+                    <Typography variant="headline" component="h2">
+                        Loading
                     </Typography>
-                ) : (
-                    <Typography type="body2">
-                        We use this password to securely store your data. We'll
-                        only ask for it once when you start BunqDesktop. Losing
-                        it just means you'll have to enter a new password and
-                        enter your API key so we can log you back in.
+                    <CircularProgress size={50} />
+                    <Typography variant="subheading">
+                        {status_message}
                     </Typography>
-                )}
+                </CardContent>
+            ) : (
+                <CardContent style={{ textAlign: "center" }}>
+                    <Typography variant="headline" component="h2">
+                        {hasStoredApiKey ? (
+                            t("Enter your password")
+                        ) : (
+                            t("Enter a password")
+                        )}
+                    </Typography>
 
-                <Input
-                    autoFocus
-                    style={styles.passwordInput}
-                    error={!this.state.passwordValid}
-                    type="password"
-                    label="Password"
-                    hint="A secure 7+ character password"
-                    onChange={this.handlePasswordChange}
-                    onKeyPress={ev => {
-                        if (ev.key === "Enter" && buttonDisabled === false) {
-                            this.setRegistration();
-                            ev.preventDefault();
-                        }
-                    }}
-                    value={this.state.password}
-                />
+                    <Input
+                        autoFocus
+                        style={styles.passwordInput}
+                        error={!this.state.passwordValid}
+                        type="password"
+                        label="Password"
+                        hint="A secure 7+ character password"
+                        onChange={this.handlePasswordChange}
+                        onKeyPress={ev => {
+                            if (
+                                ev.key === "Enter" &&
+                                buttonDisabled === false
+                            ) {
+                                this.setRegistration();
+                                ev.preventDefault();
+                            }
+                        }}
+                        value={this.state.password}
+                    />
 
-                <Button
-                    raised
-                    disabled={buttonDisabled}
-                    color={"primary"}
-                    style={styles.loginButton}
-                    onClick={this.setRegistration}
-                >
-                    {hasStoredApiKey ? (
-                        "Load your API key"
-                    ) : (
-                        "Setup your new password"
-                    )}
-                </Button>
-
-                {hasStoredApiKey ? (
-                    <Button
-                        raised
-                        color={"accent"}
-                        style={styles.loginButton}
-                        onClick={this.clearApiKey}
+                    <Grid
+                        container
+                        spacing={16}
+                        justify="center"
+                        style={{ marginTop: 16 }}
                     >
-                        Remove your stored API key
-                    </Button>
-                ) : null}
+                        <Grid item xs={6}>
+                            <TranslateButton
+                                variant="raised"
+                                disabled={buttonDisabled}
+                                color={"primary"}
+                                style={styles.loginButton}
+                                onClick={this.setRegistration}
+                            >
+                                Login
+                            </TranslateButton>
+                        </Grid>
 
-                {(hasStoredApiKey === true && useNoPassword === true) ||
-                hasStoredApiKey === false ? (
-                    <div style={{ marginTop: 20 }}>
-                        <Typography type="body2">
-                            Alternatively, you can choose to not encrypt your
-                            data.
-                        </Typography>
-                        <Typography type="body2">
-                            If anyone gets access to your computer and they know
-                            what they are doing they can get access to your API
-                            key!
-                        </Typography>
-                        <Button
-                            raised
-                            color={"accent"}
-                            style={styles.loginButton}
-                            onClick={this.props.useNoPasswordLogin}
-                        >
-                            Use no password
-                        </Button>
-                    </div>
-                ) : null}
-            </CardContent>
-        );
+                        {hasStoredApiKey ? (
+                            <Grid item xs={6}>
+                                <TranslateButton
+                                    variant="raised"
+                                    color={"secondary"}
+                                    style={styles.loginButton}
+                                    onClick={this.clearApiKey}
+                                >
+                                    Logout
+                                </TranslateButton>
+                            </Grid>
+                        ) : null}
+
+                        {(hasStoredApiKey === true && useNoPassword === true) ||
+                        hasStoredApiKey === false ? (
+                            <Grid item xs={6}>
+                                <TranslateButton
+                                    variant="raised"
+                                    color={"secondary"}
+                                    style={styles.loginButton}
+                                    onClick={this.props.useNoPasswordLogin}
+                                >
+                                    Use no password
+                                </TranslateButton>
+                            </Grid>
+                        ) : null}
+                    </Grid>
+                </CardContent>
+            );
+        }
 
         return (
-            <Grid container spacing={16} justify={"center"}>
+            <Grid
+                container
+                spacing={16}
+                justify={"center"}
+                alignItems={"center"}
+                style={styles.wrapperContainer}
+            >
                 <Helmet>
-                    <title>{`BunqDesktop - Password Setup`}</title>
+                    <title>{`BunqDesktop - ${t("Password Setup")}`}</title>
                 </Helmet>
 
-                <Grid item xs={12} sm={10} md={8} lg={6}>
+                <Grid item xs={12} sm={8} md={6} lg={4}>
                     <Card>{cardContent}</Card>
                 </Grid>
-                <Grid item xs={12} />
-                {/* Hide the warning if registration is loading 0*/}
-                {this.props.registrationLoading ? null : (
-                    <Grid item xs={12} sm={10} md={8} lg={6}>
-                        <Card>
-                            <CardContent>
-                                <Typography type="headline">
-                                    <WarningIcon /> Caution!
-                                </Typography>
-                                <Typography type="body2">
-                                    This project is still in active development!
-                                </Typography>
-                                <Typography type="body2">
-                                    We test everything before releasing updates
-                                    but until we release version 1.0.0 we advice
-                                    against using BunqDesktop to make big
-                                    payments.
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                )}
             </Grid>
         );
     }
@@ -279,4 +308,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(LoginPassword);
+export default connect(mapStateToProps, mapDispatchToProps)(
+    translate("translations")(LoginPassword)
+);

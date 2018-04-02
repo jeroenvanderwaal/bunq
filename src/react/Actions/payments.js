@@ -1,22 +1,71 @@
 import BunqErrorHandler from "../Helpers/BunqErrorHandler";
+import Payment from "../Models/Payment";
 
-export function paymentsSetInfo(payments, account_id) {
+export const STORED_PAYMENTS = "BUNQDESKTOP_STORED_PAYMENTS";
+
+export function paymentsSetInfo(
+    payments,
+    account_id,
+    resetOldItems = false,
+    BunqJSClient = false
+) {
+    const type = resetOldItems ? "PAYMENTS_SET_INFO" : "PAYMENTS_UPDATE_INFO";
+
     return {
-        type: "PAYMENTS_SET_INFO",
+        type: type,
         payload: {
-            payments: payments,
-            account_id: account_id
+            BunqJSClient,
+            payments,
+            account_id
         }
     };
 }
 
-export function paymentInfoUpdate(BunqJSClient, user_id, account_id) {
+export function loadStoredPayments(BunqJSClient) {
+    return dispatch => {
+        BunqJSClient.Session
+            .loadEncryptedData(STORED_PAYMENTS)
+            .then(data => {
+                if (data && data.items) {
+                    // turn plain objects into Model objects
+                    const paymentsNew = data.items.map(
+                        item => new Payment(item)
+                    );
+
+                    dispatch(paymentsSetInfo(paymentsNew, data.account_id));
+                }
+            })
+            .catch(error => {});
+    };
+}
+
+export function paymentInfoUpdate(
+    BunqJSClient,
+    user_id,
+    account_id,
+    options = {
+        count: 50,
+        newer_id: false,
+        older_id: false
+    }
+) {
     return dispatch => {
         dispatch(paymentsLoading());
+
         BunqJSClient.api.payment
-            .list(user_id, account_id)
+            .list(user_id, account_id, options)
             .then(payments => {
-                dispatch(paymentsSetInfo(payments, account_id));
+                // turn plain objects into Model objects
+                const paymentsNew = payments.map(item => new Payment(item));
+
+                dispatch(
+                    paymentsSetInfo(
+                        paymentsNew,
+                        account_id,
+                        false,
+                        BunqJSClient
+                    )
+                );
                 dispatch(paymentsNotLoading());
             })
             .catch(error => {

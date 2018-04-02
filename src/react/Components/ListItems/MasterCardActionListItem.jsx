@@ -1,4 +1,5 @@
 import React from "react";
+import { translate } from "react-i18next";
 import { withTheme } from "material-ui/styles";
 import {
     ListItem,
@@ -8,10 +9,13 @@ import {
 import Avatar from "material-ui/Avatar";
 import Divider from "material-ui/Divider";
 
-import { formatMoney } from "../../Helpers/Utils";
 import NavLink from "../../Components/Routing/NavLink";
-import LazyAttachmentImage from "../../Components/AttachmentImage/LazyAttachmentImage";
+import LazyAttachmentImage from "../AttachmentImage/LazyAttachmentImage";
+import CategoryIcons from "../Categories/CategoryIcons";
 import MoneyAmountLabel from "../MoneyAmountLabel";
+
+import { masterCardActionParser } from "../../Helpers/StatusTexts";
+import { formatMoney } from "../../Helpers/Utils";
 
 const styles = {
     smallAvatar: {
@@ -31,12 +35,12 @@ class MasterCardActionListItem extends React.Component {
         };
     }
 
-    shouldComponentUpdate(nextProps) {
-        return nextProps.masterCardAction.id !== this.props.masterCardAction.id;
-    }
+    // shouldComponentUpdate(nextProps) {
+    //     return nextProps.masterCardAction.id !== this.props.masterCardAction.id;
+    // }
 
     render() {
-        const { masterCardAction, theme } = this.props;
+        const { masterCardAction, t } = this.props;
 
         let imageUUID = false;
         if (masterCardAction.counterparty_alias.avatar) {
@@ -47,6 +51,7 @@ class MasterCardActionListItem extends React.Component {
         const displayName = masterCardAction.counterparty_alias.display_name;
         const paymentAmount = masterCardAction.amount_billing.value;
         const formattedPaymentAmount = formatMoney(paymentAmount);
+        const secondaryText = masterCardActionParser(masterCardAction, t);
 
         return [
             <ListItem
@@ -61,11 +66,8 @@ class MasterCardActionListItem extends React.Component {
                         imageUUID={imageUUID}
                     />
                 </Avatar>
-                <ListItemText
-                    primary={displayName}
-                    secondary={"Card payment"}
-                />
-                <ListItemSecondaryAction>
+                <ListItemText primary={displayName} secondary={secondaryText} />
+                <ListItemSecondaryAction style={{ marginTop: -16 }}>
                     <MoneyAmountLabel
                         style={styles.moneyAmountLabel}
                         info={masterCardAction}
@@ -74,10 +76,20 @@ class MasterCardActionListItem extends React.Component {
                         {formattedPaymentAmount}
                     </MoneyAmountLabel>
                 </ListItemSecondaryAction>
+                <CategoryIcons
+                    style={{ marginTop: 26 }}
+                    type={"MasterCardAction"}
+                    id={masterCardAction.id}
+                />
             </ListItem>,
+
             <Divider />
         ];
     }
 }
 
-export default withTheme()(MasterCardActionListItem);
+MasterCardActionListItem.defaultProps = {
+    minimalDisplay: false
+};
+
+export default withTheme()(translate("translations")(MasterCardActionListItem));

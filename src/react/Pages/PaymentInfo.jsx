@@ -7,16 +7,22 @@ import Paper from "material-ui/Paper";
 import Button from "material-ui/Button";
 import List, { ListItem, ListItemText } from "material-ui/List";
 import Divider from "material-ui/Divider";
-import ArrowBackIcon from "material-ui-icons/ArrowBack";
 import CircularProgress from "material-ui/Progress/CircularProgress";
 import Typography from "material-ui/Typography";
 
+import ArrowBackIcon from "material-ui-icons/ArrowBack";
+import HelpIcon from "material-ui-icons/Help";
+
+import ExportDialog from "../Components/ExportDialog";
 import { formatMoney, humanReadableDate } from "../Helpers/Utils";
 import { paymentText, paymentTypeParser } from "../Helpers/StatusTexts";
+
 import MoneyAmountLabel from "../Components/MoneyAmountLabel";
 import TransactionHeader from "../Components/TransactionHeader";
+import CategorySelector from "../Components/Categories/CategorySelector";
 
 import { paymentsUpdate } from "../Actions/payment_info";
+import { translate } from "react-i18next";
 
 const styles = {
     btn: {},
@@ -34,11 +40,17 @@ const styles = {
 class PaymentInfo extends React.Component {
     constructor(props, context) {
         super(props, context);
-        this.state = {};
+        this.state = {
+            displayExport: false
+        };
     }
 
     componentDidMount() {
-        if (this.props.initialBunqConnect) {
+        if (
+            this.props.user &&
+            this.props.user.id &&
+            this.props.initialBunqConnect
+        ) {
             const { paymentId, accountId } = this.props.match.params;
             this.props.updatePayment(
                 this.props.user.id,
@@ -52,6 +64,8 @@ class PaymentInfo extends React.Component {
 
     componentWillUpdate(nextProps, nextState) {
         if (
+            nextProps.user &&
+            nextProps.user.id &&
             this.props.initialBunqConnect &&
             this.props.match.params.paymentId !==
                 nextProps.match.params.paymentId
@@ -68,7 +82,12 @@ class PaymentInfo extends React.Component {
     }
 
     render() {
-        const { accountsSelectedAccount, payment, paymentLoading } = this.props;
+        const {
+            accountsSelectedAccount,
+            paymentInfo,
+            paymentLoading,
+            t
+        } = this.props;
         const paramAccountId = this.props.match.params.accountId;
 
         // we require a selected account before we can display payment information
@@ -78,7 +97,7 @@ class PaymentInfo extends React.Component {
         }
 
         let content;
-        if (payment === false || paymentLoading === true) {
+        if (paymentInfo === false || paymentLoading === true) {
             content = (
                 <Grid container spacing={24} justify={"center"}>
                     <Grid item xs={12}>
@@ -89,11 +108,12 @@ class PaymentInfo extends React.Component {
                 </Grid>
             );
         } else {
+            const payment = paymentInfo.Payment;
             const paymentDescription = payment.description;
             const paymentDate = humanReadableDate(payment.updated);
             const paymentAmount = payment.amount.value;
             const formattedPaymentAmount = formatMoney(paymentAmount);
-            const paymentLabel = paymentText(payment);
+            const paymentLabel = paymentText(payment, t);
             const counterPartyIban = payment.counterparty_alias.iban;
 
             content = (
@@ -107,6 +127,8 @@ class PaymentInfo extends React.Component {
                         BunqJSClient={this.props.BunqJSClient}
                         to={payment.counterparty_alias}
                         from={payment.alias}
+                        user={this.props.user}
+                        accounts={this.props.accounts}
                         swap={paymentAmount > 0}
                     />
 
@@ -122,7 +144,7 @@ class PaymentInfo extends React.Component {
 
                         <Typography
                             style={{ textAlign: "center" }}
-                            type={"body1"}
+                            variant={"body1"}
                         >
                             {paymentLabel}
                         </Typography>
@@ -143,15 +165,18 @@ class PaymentInfo extends React.Component {
                             <Divider />
                             <ListItem>
                                 <ListItemText
-                                    primary={"Date"}
+                                    primary={t("Date")}
                                     secondary={paymentDate}
                                 />
                             </ListItem>
                             <Divider />
                             <ListItem>
                                 <ListItemText
-                                    primary={"Payment Type"}
-                                    secondary={paymentTypeParser(payment.type)}
+                                    primary={t("Payment Type")}
+                                    secondary={paymentTypeParser(
+                                        payment.type,
+                                        t
+                                    )}
                                 />
                             </ListItem>
                             <Divider />
@@ -161,8 +186,12 @@ class PaymentInfo extends React.Component {
                                     secondary={counterPartyIban}
                                 />
                             </ListItem>
-                            <Divider />
                         </List>
+
+                        <CategorySelector
+                            type={t("Payment")}
+                            item={paymentInfo}
+                        />
                     </Grid>
                 </Grid>
             );
@@ -171,7 +200,7 @@ class PaymentInfo extends React.Component {
         return (
             <Grid container spacing={24}>
                 <Helmet>
-                    <title>{`BunqDesktop - Payment Info`}</title>
+                    <title>{`BunqDesktop - ${t("Payment Info")}`}</title>
                 </Helmet>
 
                 <Grid item xs={12} sm={2}>
@@ -182,8 +211,27 @@ class PaymentInfo extends React.Component {
                         <ArrowBackIcon />
                     </Button>
                 </Grid>
+
                 <Grid item xs={12} sm={8}>
                     <Paper style={styles.paper}>{content}</Paper>
+                </Grid>
+
+                <Grid item xs={12} sm={2} style={{ textAlign: "right" }}>
+                    <ExportDialog
+                        closeModal={event =>
+                            this.setState({ displayExport: false })}
+                        title={t("Export info")}
+                        open={this.state.displayExport}
+                        object={this.props.paymentInfo}
+                    />
+
+                    <Button
+                        style={styles.button}
+                        onClick={event =>
+                            this.setState({ displayExport: true })}
+                    >
+                        <HelpIcon />
+                    </Button>
                 </Grid>
             </Grid>
         );
@@ -193,9 +241,11 @@ class PaymentInfo extends React.Component {
 const mapStateToProps = state => {
     return {
         user: state.user.user,
-        payment: state.payment_info.payment,
+
+        paymentInfo: state.payment_info.payment,
         paymentLoading: state.payment_info.loading,
-        accountsSelectedAccount: state.accounts.selectedAccount
+        accountsSelectedAccount: state.accounts.selectedAccount,
+        accounts: state.accounts.accounts
     };
 };
 
@@ -209,4 +259,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(PaymentInfo);
+export default connect(mapStateToProps, mapDispatchToProps)(
+    translate("translations")(PaymentInfo)
+);

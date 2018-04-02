@@ -1,4 +1,5 @@
 import React from "react";
+import { translate } from "react-i18next";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
 import Grid from "material-ui/Grid";
@@ -34,7 +35,7 @@ class BunqMeTab extends React.Component {
     componentDidMount() {
         // set the current account selected on the dashboard as the active one
         this.props.accounts.map((account, accountKey) => {
-            if (this.props.selectedAccount === account.MonetaryAccountBank.id) {
+            if (this.props.selectedAccount === account.id) {
                 this.setState({ selectedAccount: accountKey });
             }
         });
@@ -46,10 +47,11 @@ class BunqMeTab extends React.Component {
     toggleForm = () => this.setState({ showForm: !this.state.showForm });
 
     render() {
+        const t=this.props.t;
         return (
             <Grid container spacing={16}>
                 <Helmet>
-                    <title>{`BunqDesktop - bunq.me requests`}</title>
+                    <title>{`BunqDesktop - ${t("bunqme Requests")}`}</title>
                 </Helmet>
 
                 <Grid item xs={12} md={4}>
@@ -65,7 +67,6 @@ class BunqMeTab extends React.Component {
                 <Grid item xs={12} md={8}>
                     <Collapse
                         in={this.state.showForm}
-                        transitionDuration="auto"
                         unmountOnExit
                     >
                         <Paper style={styles.paper}>
@@ -114,4 +115,6 @@ const mapDispatchToProps = (dispatch, props) => {
     };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(BunqMeTab);
+export default connect(mapStateToProps, mapDispatchToProps)(
+    translate("translations")(BunqMeTab)
+);

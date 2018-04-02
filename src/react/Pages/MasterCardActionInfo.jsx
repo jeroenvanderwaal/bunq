@@ -1,4 +1,5 @@
 import React from "react";
+import { translate } from "react-i18next";
 import { connect } from "react-redux";
 import { withTheme } from "material-ui/styles";
 import Helmet from "react-helmet";
@@ -8,18 +9,22 @@ import Paper from "material-ui/Paper";
 import Button from "material-ui/Button";
 import List, { ListItem, ListItemText } from "material-ui/List";
 import Divider from "material-ui/Divider";
-import ArrowBackIcon from "material-ui-icons/ArrowBack";
 import CircularProgress from "material-ui/Progress/CircularProgress";
 import Typography from "material-ui/Typography";
+
+import ArrowBackIcon from "material-ui-icons/ArrowBack";
+import HelpIcon from "material-ui-icons/Help";
+
+import ExportDialog from "../Components/ExportDialog";
+import TransactionHeader from "../Components/TransactionHeader";
+import MoneyAmountLabel from "../Components/MoneyAmountLabel";
+import CategorySelector from "../Components/Categories/CategorySelector";
 
 import { formatMoney, humanReadableDate } from "../Helpers/Utils";
 import {
     masterCardActionText,
     masterCardActionParser
 } from "../Helpers/StatusTexts";
-import TransactionHeader from "../Components/TransactionHeader";
-import MoneyAmountLabel from "../Components/MoneyAmountLabel";
-
 import { masterCardActionInfoUpdate } from "../Actions/master_card_action_info";
 
 const styles = {
@@ -38,11 +43,17 @@ const styles = {
 class MasterCardActionInfo extends React.Component {
     constructor(props, context) {
         super(props, context);
-        this.state = {};
+        this.state = {
+            displayExport: false
+        };
     }
 
     componentDidMount() {
-        if (this.props.initialBunqConnect) {
+        if (
+            this.props.initialBunqConnect &&
+            this.props.user &&
+            this.props.user.id
+        ) {
             const { masterCardActionId, accountId } = this.props.match.params;
             this.props.masterCardActionInfoUpdate(
                 this.props.user.id,
@@ -56,6 +67,8 @@ class MasterCardActionInfo extends React.Component {
 
     componentWillUpdate(nextProps, nextState) {
         if (
+            nextProps.user &&
+            nextProps.user.id &&
             this.props.initialBunqConnect &&
             this.props.match.params.masterCardActionId !==
                 nextProps.match.params.masterCardActionId
@@ -76,7 +89,8 @@ class MasterCardActionInfo extends React.Component {
             accountsSelectedAccount,
             masterCardActionInfo,
             masterCardActionLoading,
-            theme
+            theme,
+            t
         } = this.props;
         const paramAccountId = this.props.match.params.accountId;
 
@@ -101,11 +115,11 @@ class MasterCardActionInfo extends React.Component {
                 </Grid>
             );
         } else {
-            const masterCardAction = masterCardActionInfo[0].MasterCardAction;
+            const masterCardAction = masterCardActionInfo.MasterCardAction;
             const paymentAmount = masterCardAction.amount_local.value;
             const paymentDate = humanReadableDate(masterCardAction.created);
             const formattedPaymentAmount = formatMoney(paymentAmount);
-            const paymentLabel = masterCardActionText(masterCardAction);
+            const paymentLabel = masterCardActionText(masterCardAction, t);
 
             content = (
                 <Grid
@@ -118,7 +132,8 @@ class MasterCardActionInfo extends React.Component {
                         BunqJSClient={this.props.BunqJSClient}
                         to={masterCardAction.counterparty_alias}
                         from={masterCardAction.alias}
-                        swap={paymentAmount > 0}
+                        accounts={this.props.accounts}
+                        user={this.props.user}
                     />
 
                     <Grid item xs={12}>
@@ -133,7 +148,7 @@ class MasterCardActionInfo extends React.Component {
 
                         <Typography
                             style={{ textAlign: "center" }}
-                            type={"body1"}
+                            variant={"body1"}
                         >
                             {paymentLabel}
                         </Typography>
@@ -144,7 +159,7 @@ class MasterCardActionInfo extends React.Component {
                                     <Divider />,
                                     <ListItem>
                                         <ListItemText
-                                            primary={"Description"}
+                                            primary={t("Description")}
                                             secondary={
                                                 masterCardAction.description
                                             }
@@ -156,23 +171,24 @@ class MasterCardActionInfo extends React.Component {
                             <Divider />
                             <ListItem>
                                 <ListItemText
-                                    primary={"Date"}
+                                    primary={t("Date")}
                                     secondary={paymentDate}
                                 />
                             </ListItem>
                             <Divider />
                             <ListItem>
                                 <ListItemText
-                                    primary={"Payment Type"}
+                                    primary={t("Payment Type")}
                                     secondary={masterCardActionParser(
-                                        masterCardAction.pan_entry_mode_user
+                                        masterCardAction,
+                                        t
                                     )}
                                 />
                             </ListItem>
                             <Divider />
                             <ListItem>
                                 <ListItemText
-                                    primary={"Card"}
+                                    primary={t("Card")}
                                     secondary={
                                         masterCardAction.label_card.second_line
                                     }
@@ -181,7 +197,7 @@ class MasterCardActionInfo extends React.Component {
                             <Divider />
                             <ListItem>
                                 <ListItemText
-                                    primary={"Authorisation Type"}
+                                    primary={t("Authorisation Type")}
                                     secondary={
                                         masterCardAction.authorisation_type
                                     }
@@ -190,7 +206,7 @@ class MasterCardActionInfo extends React.Component {
                             <Divider />
                             <ListItem>
                                 <ListItemText
-                                    primary={"Authorisation Status"}
+                                    primary={t("Authorisation Status")}
                                     secondary={
                                         masterCardAction.authorisation_status
                                     }
@@ -198,6 +214,11 @@ class MasterCardActionInfo extends React.Component {
                             </ListItem>
                             <Divider />
                         </List>
+
+                        <CategorySelector
+                            type={"MasterCardAction"}
+                            item={masterCardActionInfo}
+                        />
                     </Grid>
                 </Grid>
             );
@@ -206,7 +227,7 @@ class MasterCardActionInfo extends React.Component {
         return (
             <Grid container spacing={24}>
                 <Helmet>
-                    <title>{`BunqDesktop - Mastercard Info`}</title>
+                    <title>{`BunqDesktop - ${t("Mastercard Info")}`}</title>
                 </Helmet>
 
                 <Grid item xs={12} sm={2}>
@@ -217,8 +238,27 @@ class MasterCardActionInfo extends React.Component {
                         <ArrowBackIcon />
                     </Button>
                 </Grid>
+
                 <Grid item xs={12} sm={8}>
                     <Paper style={styles.paper}>{content}</Paper>
+                </Grid>
+
+                <Grid item xs={12} sm={2} style={{ textAlign: "right" }}>
+                    <ExportDialog
+                        closeModal={event =>
+                            this.setState({ displayExport: false })}
+                        title={t("Export info")}
+                        open={this.state.displayExport}
+                        object={this.props.masterCardActionInfo}
+                    />
+
+                    <Button
+                        style={styles.button}
+                        onClick={event =>
+                            this.setState({ displayExport: true })}
+                    >
+                        <HelpIcon />
+                    </Button>
                 </Grid>
             </Grid>
         );
@@ -231,6 +271,7 @@ const mapStateToProps = state => {
         masterCardActionInfo:
             state.master_card_action_info.master_card_action_info,
         masterCardActionLoading: state.master_card_action_info.loading,
+        accounts: state.accounts.accounts,
         accountsSelectedAccount: state.accounts.selectedAccount
     };
 };
@@ -255,5 +296,5 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(
-    withTheme()(MasterCardActionInfo)
+    withTheme()(translate("translations")(MasterCardActionInfo))
 );
