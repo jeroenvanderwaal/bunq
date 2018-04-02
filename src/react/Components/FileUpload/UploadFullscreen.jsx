@@ -1,4 +1,5 @@
 import React from "react";
+import { translate } from "react-i18next";
 import withStyles from "material-ui/styles/withStyles";
 import Dialog from "material-ui/Dialog";
 import Button from "material-ui/Button";
@@ -50,16 +51,14 @@ class UploadFullscreen extends React.PureComponent {
     };
 
     render() {
-        const { classes } = this.props;
+        const { classes,t } = this.props;
         return (
             <Dialog
                 fullScreen
                 className={classes.dialog}
                 open={this.props.open}
-                onRequestClose={this.props.handleRequestClose}
                 onClick={this.props.handleRequestClose}
-                onEscapeKeyUp={this.props.handleRequestClose}
-                onBackdropClick={this.props.handleRequestClose}
+                onClose={this.props.handleRequestClose}
                 transition={Transition}
             >
                 <div className={classes.content}>
@@ -68,17 +67,17 @@ class UploadFullscreen extends React.PureComponent {
                             type={"headline"}
                             className={classes.header}
                         >
-                            {this.props.headlineText}
+                            {t(this.props.headlineText)}
                         </Typography>
                         <FileDropZone onChange={this.onFileChange} />
                         <br />
                         {this.state.file !== false ? (
                             <Button
-                                raised
+                                variant={"raised"}
                                 className={classes.uploadButton}
                                 onClick={this.startUpload}
                             >
-                                {this.props.buttonText}
+                                {t(this.props.buttonText)}
                             </Button>
                         ) : null}
                     </div>
@@ -93,4 +92,4 @@ UploadFullscreen.defaultProps = {
     buttonText: "Upload"
 };
 
-export default withStyles(styles)(UploadFullscreen);
+export default withStyles(styles)(translate("translations")(UploadFullscreen));

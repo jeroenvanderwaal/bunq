@@ -15,7 +15,9 @@ import PhoneIcon from "material-ui-icons/Phone";
 import EmailIcon from "material-ui-icons/Email";
 import PersonIcon from "material-ui-icons/Person";
 import DeleteIcon from "material-ui-icons/Delete";
+import LinkIcon from "material-ui-icons/Link";
 
+import UploadFullscreen from "./FileUpload/UploadFullscreen";
 import LazyAttachmentImage from "./AttachmentImage/LazyAttachmentImage";
 import AccountQRFullscreen from "./QR/AccountQRFullscreen";
 import { formatMoney } from "../Helpers/Utils";
@@ -30,7 +32,10 @@ const styles = {
 class AccountCard extends React.Component {
     constructor(props, context) {
         super(props, context);
-        this.state = {};
+
+        this.state = {
+            displayUploadScreen: false
+        };
     }
 
     copiedValue = type => callback => {
@@ -49,9 +54,23 @@ class AccountCard extends React.Component {
 
         return (
             <Paper>
+                <UploadFullscreen
+                    BunqJSClient={this.props.BunqJSClient}
+                    open={this.state.displayUploadScreen}
+                    handleRequestClose={_ =>
+                        this.setState({
+                            displayUploadScreen: false
+                        })}
+                />
                 <List>
                     <ListItem>
-                        <Avatar style={styles.avatar}>
+                        <Avatar
+                            style={styles.avatar}
+                            onClick={_ =>
+                                this.setState({
+                                    displayUploadScreen: true
+                                })}
+                        >
                             <LazyAttachmentImage
                                 width={60}
                                 BunqJSClient={this.props.BunqJSClient}
@@ -85,6 +104,9 @@ class AccountCard extends React.Component {
                                 break;
                             case "IBAN":
                                 icon = <AccountBalanceIcon />;
+                                break;
+                            case "URL":
+                                icon = <LinkIcon />;
                                 break;
                         }
 
