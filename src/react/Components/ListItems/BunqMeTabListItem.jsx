@@ -1,19 +1,17 @@
 import React from "react";
 import { translate } from "react-i18next";
 import CopyToClipboard from "react-copy-to-clipboard";
-import {
-    ListItem,
-    ListItemText,
-    ListItemSecondaryAction
-} from "material-ui/List";
-import withTheme from "material-ui/styles/withTheme";
-import Collapse from "material-ui/transitions/Collapse";
-import IconButton from "material-ui/IconButton";
-import Divider from "material-ui/Divider";
-import Avatar from "material-ui/Avatar";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import withTheme from "@material-ui/core/styles/withTheme";
+import Collapse from "@material-ui/core/Collapse";
+import IconButton from "@material-ui/core/IconButton";
+import Divider from "@material-ui/core/Divider";
+import Avatar from "@material-ui/core/Avatar";
 
-import CopyIcon from "material-ui-icons/ContentCopy";
-import Share from "material-ui-icons/Share";
+import CopyIcon from "@material-ui/icons/ContentCopy";
+import Share from "@material-ui/icons/Share";
 
 import PaymentListItem from "./PaymentListItem";
 import AccountQRFullscreen from "../QR/AccountQRFullscreen";
@@ -107,7 +105,7 @@ class BunqMeTabListItem extends React.Component {
                     <AccountQRFullscreen mode="HIDDEN" text={shareUrl} />
                     <CopyToClipboard
                         text={shareUrl}
-                        onCopy={this.props.copiedValue("the bunq.me tab url")}
+                        onCopy={this.props.copiedValue("the bunq tab url")}
                     >
                         <IconButton aria-label="Copy the share url">
                             <CopyIcon />

@@ -1,6 +1,6 @@
 import React from "react";
-import { FormControlLabel } from "material-ui/Form";
-import Switch from "material-ui/Switch";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Switch from "@material-ui/core/Switch";
 
 class AllowBunqMe extends React.Component {
     render() {
@@ -19,7 +19,7 @@ class AllowBunqMe extends React.Component {
                         onChange={handleToggle}
                     />
                 }
-                label={t("Allow bunq.me? If the user doesn't own a bunq account a bunq.me request will be sent instead")}
+                label={t("Allow bunqme? If the user doesn't own a bunq account a bunqme request will be sent instead")}
             />
         );
     }

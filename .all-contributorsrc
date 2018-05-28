@@ -7,20 +7,36 @@
     "README.md"
   ],
   "imageSize": 80,
-  "commit": true,
+  "commit": false,
   "contributors": [
     {
       "login": "Crecket",
       "name": "Gregory Goijaerts",
       "avatar_url": "https://avatars2.githubusercontent.com/u/7481136?v=4",
-      "profile": "https://www.masterypoints.com",
+      "profile": "https://github.com/Crecket",
       "contributions": [
         "code",
         "design",
         "doc",
         "infra",
         "review",
-        "platform"
+        "platform",
+        "question",
+        "bug"
+      ]
+    },
+    {
+      "login": "DennisSnijder",
+      "name": "Dennis Snijder",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/6953846?v=4",
+      "profile": "http://snijder.io",
+      "contributions": [
+        "bug",
+        "code",
+        "design",
+        "ideas",
+        "doc",
+        "question"
       ]
     },
     {
@@ -43,16 +59,8 @@
       "contributions": [
         "bug",
         "code",
-        "ideas"
-      ]
-    },
-    {
-      "login": "janxb",
-      "name": "Jan Brodda",
-      "avatar_url": "https://avatars1.githubusercontent.com/u/1172106?v=4",
-      "profile": "http://janbrodda.de",
-      "contributions": [
-        "bug"
+        "ideas",
+        "question"
       ]
     },
     {
@@ -66,6 +74,36 @@
       ]
     },
     {
+      "login": "TimZ99",
+      "name": "Tim",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/15219858?v=4",
+      "profile": "https://github.com/TimZ99",
+      "contributions": [
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "login": "OGKevin",
+      "name": "Kevin Hellemun",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/17928966?v=4",
+      "profile": "https://www.linkedin.com/in/kevin-hellemun-9b3ab8130",
+      "contributions": [
+        "question",
+        "ideas",
+        "bug"
+      ]
+    },
+    {
+      "login": "janxb",
+      "name": "Jan Brodda",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/1172106?v=4",
+      "profile": "http://janbrodda.de",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
       "login": "remcomldr",
       "name": "remcomldr",
       "avatar_url": "https://avatars1.githubusercontent.com/u/34551774?v=4",
@@ -75,35 +113,12 @@
       ]
     },
     {
-      "login": "DennisSnijder",
-      "name": "Dennis Snijder",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/6953846?v=4",
-      "profile": "http://snijder.io",
-      "contributions": [
-        "bug",
-        "code",
-        "design",
-        "ideas",
-        "doc"
-      ]
-    },
-    {
       "login": "nimpie",
       "name": "nimpie",
       "avatar_url": "https://avatars0.githubusercontent.com/u/10500054?v=4",
       "profile": "https://github.com/nimpie",
       "contributions": [
         "bug"
-      ]
-    },
-    {
-      "login": "TimZ99",
-      "name": "Tim",
-      "avatar_url": "https://avatars1.githubusercontent.com/u/15219858?v=4",
-      "profile": "https://github.com/TimZ99",
-      "contributions": [
-        "bug",
-        "code"
       ]
     },
     {
@@ -140,6 +155,24 @@
       "profile": "https://github.com/ntimo",
       "contributions": [
         "translation"
+      ]
+    },
+    {
+      "login": "MrLuit",
+      "name": "Luit Hollander",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/12037024?v=4",
+      "profile": "https://luithollander.nl",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "s-john19",
+      "name": "s-john19",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/36280159?v=4",
+      "profile": "https://github.com/s-john19",
+      "contributions": [
+        "bug"
       ]
     }
   ]

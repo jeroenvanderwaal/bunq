@@ -1,24 +1,31 @@
 import * as React from "react";
+import { translate } from "react-i18next";
 import Redirect from "react-router-dom/Redirect";
-import Grid from "material-ui/Grid";
-import Paper from "material-ui/Paper";
-import Input from "material-ui/Input";
-import Select from "material-ui/Select";
-import Button from "material-ui/Button";
-import Switch from "material-ui/Switch";
-import Divider from "material-ui/Divider";
-import { MenuItem } from "material-ui/Menu";
-import TextField from "material-ui/TextField";
-import { InputLabel } from "material-ui/Input";
-import Typography from "material-ui/Typography";
-import { FormControl, FormControlLabel } from "material-ui/Form";
-import Table, { TableCell, TableHead, TableRow } from "material-ui/Table";
+import Grid from "@material-ui/core/Grid";
+import Paper from "@material-ui/core/Paper";
+import Input from "@material-ui/core/Input";
+import Select from "@material-ui/core/Select";
+import Button from "@material-ui/core/Button";
+import Switch from "@material-ui/core/Switch";
+import Divider from "@material-ui/core/Divider";
+import MenuItemObj from "@material-ui/core/Menu";
+import TextField from "@material-ui/core/TextField";
+import InputLabel  from "@material-ui/core/InputLabel";
+import Typography from "@material-ui/core/Typography";
+import FormControl from "@material-ui/core/FormControl";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Table from "@material-ui/core/Table";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
 
 import CategoryChip from "../../Components/Categories/CategoryChip";
 import ExportDialog from "../../Components/ExportDialog";
 import ImportDialog from "../../Components/ImportDialog";
 import NewRuleItemMenu from "./NewRuleItemMenu";
-import RuleCollectionMenu from "./RuleCollectionMenu";
+import RuleCollectionMenu2 from "./RuleCollectionMenu";
+const RuleCollectionMenu: any = RuleCollectionMenu2;
+const MenuItem: any = MenuItemObj;
 
 import ValueRuleItem from "./RuleTypeItems/ValueRuleItem";
 import TransactionAmountRuleItem from "./RuleTypeItems/TransactionAmountRuleItem";
@@ -142,7 +149,7 @@ class RuleCreator extends React.Component<any, any> {
         this.setState({ rules: rules });
     };
     addRule = (ruleType: RuleTypes) => {
-        const rules = [...this.state.rules];
+        let rules = [...this.state.rules];
         let newRule: Rule;
 
         switch (ruleType) {
@@ -150,7 +157,7 @@ class RuleCreator extends React.Component<any, any> {
                 newRule = {
                     ruleType: "VALUE",
                     field: "DESCRIPTION",
-                    matchType: "EXACT",
+                    matchType: "CONTAINS",
                     value: ""
                 };
                 break;
@@ -171,7 +178,29 @@ class RuleCreator extends React.Component<any, any> {
                 return false;
         }
 
+        // add the new rule to the list
         rules.push(newRule);
+
+        // put the item_type first becuase these are checked the fastest
+        rules = rules.sort((ruleA: Rule, ruleB: Rule) => {
+            if (
+                ruleA.ruleType === "ITEM_TYPE" &&
+                ruleB.ruleType === "ITEM_TYPE"
+            ) {
+                return 0;
+            } else if (
+                ruleA.ruleType !== "ITEM_TYPE" &&
+                ruleB.ruleType === "ITEM_TYPE"
+            ) {
+                return 1;
+            } else if (
+                ruleA.ruleType === "ITEM_TYPE" &&
+                ruleB.ruleType !== "ITEM_TYPE"
+            ) {
+                return -1;
+            }
+        });
+
         this.setState({ rules: rules }, this.updatePreview);
     };
 
@@ -238,7 +267,7 @@ class RuleCreator extends React.Component<any, any> {
             return;
         }
 
-        // add the rule to the rule set
+        // add the rule to the ruleset
         const rules: Rule[] = [...this.state.rules];
         rules.push(rule);
         this.setState({ rules: rules }, this.updatePreview);
@@ -348,7 +377,7 @@ class RuleCreator extends React.Component<any, any> {
 
                         <Grid item xs={12} sm={6}>
                             <TextField
-                                label={t("Rule set title")}
+                                label={t("Ruleset title")}
                                 value={title}
                                 style={styles.inputField}
                                 onChange={this.handleTitleChange}
@@ -370,7 +399,7 @@ class RuleCreator extends React.Component<any, any> {
                                         onChange={this.handleEnabledToggle}
                                     />
                                 }
-                                label={t("Enable or disable this rule set")}
+                                label={t("Enable or disable this ruleset")}
                             />
                         </Grid>
 
@@ -380,6 +409,7 @@ class RuleCreator extends React.Component<any, any> {
                                     {t("Match requirements")}
                                 </InputLabel>
                                 <Select
+                                    native={false}
                                     value={this.state.matchType}
                                     onChange={this.handleMatchTypeChange}
                                     input={
@@ -424,7 +454,7 @@ class RuleCreator extends React.Component<any, any> {
                                         variant="title"
                                         style={styles.subTitle}
                                     >
-                                        Rules
+                                        {t("Rules")}
                                     </Typography>
                                 </TableCell>
                                 <TableCell>{null}</TableCell>
@@ -475,4 +505,4 @@ class RuleCreator extends React.Component<any, any> {
     }
 }
 
-export default RuleCreator;
+export default translate("translations")(RuleCreator);

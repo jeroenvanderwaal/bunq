@@ -1,16 +1,21 @@
 import React from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
-import TextField from "material-ui/TextField";
-import Dialog, {
-    DialogActions,
-    DialogContent,
-    DialogTitle
-} from "material-ui/Dialog";
-import Slide from "material-ui/transitions/Slide";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import Slide from "@material-ui/core/Slide";
 
 import TranslateButton from "./TranslationHelpers/Button";
+import ReactJsonWrapper from "./ReactJsonWrapper";
 
 const Transition = props => <Slide direction="right" {...props} />;
+
+const styles = {
+    textField: {
+        width: 480
+    }
+};
 
 export default props => {
     const { open, closeModal, title, object } = props;
@@ -18,22 +23,20 @@ export default props => {
 
     return (
         <Dialog
-            transition={Transition}
+            TransitionComponent={Transition}
             keepMounted
             open={open}
             onClose={closeModal}
         >
             <DialogTitle>{title}</DialogTitle>
             <DialogContent>
-                <TextField
-                    value={jsonPretty}
-                    onChange={() => {}}
-                    multiline
-                    rows="8"
-                    style={{
-                        width: 450
-                    }}
-                />
+                {object ? (
+                    <ReactJsonWrapper
+                        style={styles.textField}
+                        data={object}
+                        name="Export Data"
+                    />
+                ) : null}
             </DialogContent>
             <DialogActions>
                 <CopyToClipboard text={jsonPretty}>

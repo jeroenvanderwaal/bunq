@@ -69,7 +69,7 @@ export const masterCardActionText = (masterCardAction, t) => {
     switch (masterCardAction.authorisation_status) {
         case "AUTHORISED":
             return `${t("Sent payment with ")}${masterCardActionParser(
-                masterCardAction.pan_entry_mode_user,
+                masterCardAction,
                 t
             )}`;
         case "BLOCKED":
@@ -84,11 +84,16 @@ export const masterCardActionText = (masterCardAction, t) => {
 };
 
 export const masterCardActionParser = (masterCardAction, t) => {
+    const paymentText = t("Payment");
+
     if (masterCardAction.label_card) {
-        const paymentText = t("Payment");
+        if(masterCardAction.wallet_provider_id === "103"){
+            return "Apple Pay " + paymentText;
+        }
+
         switch (masterCardAction.label_card.type) {
             case "MAESTRO_MOBILE_NFC":
-                return "Mobile NFC " + paymentText;
+                return "Tap & Pay " + paymentText;
             case "MASTERCARD":
                 return "Mastercard " + paymentText;
             case "MAESTRO":

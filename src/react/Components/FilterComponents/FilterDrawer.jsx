@@ -2,32 +2,32 @@ import React from "react";
 import { connect } from "react-redux";
 import { translate } from "react-i18next";
 import DatePicker from "material-ui-pickers/DatePicker/index.js";
-import { withTheme } from "material-ui/styles";
-import IconButton from "material-ui/IconButton";
-import Icon from "material-ui/Icon";
-import Button from "material-ui/Button";
-import Drawer from "material-ui/Drawer";
-import Divider from "material-ui/Divider";
-import InputAdornment from "material-ui/Input/InputAdornment";
-import Typography from "material-ui/Typography";
-import Radio, { RadioGroup } from "material-ui/Radio";
-import List, {
-    ListItem,
-    ListSubheader,
-    ListItemIcon,
-    ListItemSecondaryAction
-} from "material-ui/List";
+import { withTheme } from "@material-ui/core/styles";
+import IconButton from "@material-ui/core/IconButton";
+import Icon from "@material-ui/core/Icon";
+import Button from "@material-ui/core/Button";
+import Drawer from "@material-ui/core/Drawer";
+import Divider from "@material-ui/core/Divider";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import Typography from "@material-ui/core/Typography";
+import Radio  from "@material-ui/core/Radio";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import ListItem from "@material-ui/core/ListItem";
+import ListSubheader from "@material-ui/core/ListSubheader";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import List from "@material-ui/core/List";
 
-import FilterListIcon from "material-ui-icons/FilterList";
-import CompareArrowsIcon from "material-ui-icons/CompareArrows";
-import ArrowUpward from "material-ui-icons/ArrowUpward";
-import ArrowDownward from "material-ui-icons/ArrowDownward";
-import Visible from "material-ui-icons/Visibility";
-import VisibleOff from "material-ui-icons/VisibilityOff";
-import ClearIcon from "material-ui-icons/Clear";
-import CheckCircle from "material-ui-icons/CheckCircle";
-import TimerOff from "material-ui-icons/TimerOff";
-import Cancel from "material-ui-icons/Cancel";
+import FilterListIcon from "@material-ui/icons/FilterList";
+import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
+import ArrowUpward from "@material-ui/icons/ArrowUpward";
+import ArrowDownward from "@material-ui/icons/ArrowDownward";
+import Visible from "@material-ui/icons/Visibility";
+import VisibleOff from "@material-ui/icons/VisibilityOff";
+import ClearIcon from "@material-ui/icons/Clear";
+import CheckCircle from "@material-ui/icons/CheckCircle";
+import TimerOff from "@material-ui/icons/TimerOff";
+import Cancel from "@material-ui/icons/Cancel";
 
 import {
     clearPaymentFilterType,
@@ -42,8 +42,12 @@ import {
     setFromDateFilter,
     setToDateFilter,
     clearFromDateFilter,
-    clearToDateFilter
+    clearToDateFilter,
+    resetFilters
 } from "../../Actions/filters";
+
+import SearchFilter from "./SearchFilter";
+import CategorySelection from "./CategorySelection";
 
 const styles = {
     list: {
@@ -63,6 +67,12 @@ const styles = {
         paddingTop: 0,
         paddingBottom: 0,
         height: 38
+    },
+    textFieldListItem: {
+        width: "100%"
+    },
+    textField: {
+        width: "100%"
     },
     subheaderTitle: {
         height: 40
@@ -106,14 +116,6 @@ class FilterDrawer extends React.Component {
     };
     closeDrawer = () => {
         this.setState({ open: false });
-    };
-
-    clearAll = () => {
-        this.props.clearPaymentFilterType();
-        this.props.clearBunqMeTabFilterType();
-        this.props.clearRequestFilterType();
-        this.props.clearFromDateFilter();
-        this.props.clearToDateFilter();
     };
 
     handlePaymentTypeChange = event => {
@@ -165,7 +167,11 @@ class FilterDrawer extends React.Component {
 
         const drawerList = (
             <List style={styles.list}>
-                {/* filters for both normal payments and master card actions */}
+                <ListItem style={styles.textFieldListItem}>
+                    <SearchFilter style={styles.textField} t={t} />
+                </ListItem>
+
+                {/* filters for both normal payments and mastercard actions */}
                 <ListSubheader style={styles.subheaderTitle}>
                     {t("Payments")}
                     <ListItemSecondaryAction>
@@ -391,10 +397,12 @@ class FilterDrawer extends React.Component {
                     />
                 </ListItem>
 
+                <CategorySelection t={t} />
+
                 <ListItem style={styles.listFiller} />
 
                 <Divider />
-                <ListItem button onClick={this.clearAll}>
+                <ListItem button onClick={this.props.resetFilters}>
                     <ListItemIcon>
                         <ClearIcon />
                     </ListItemIcon>
@@ -466,6 +474,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
+        resetFilters: () => dispatch(resetFilters()),
+
         clearPaymentFilterType: () => dispatch(clearPaymentFilterType()),
         setPaymentFilterType: type => dispatch(setPaymentFilterType(type)),
         togglePaymentFilterVisibility: () =>

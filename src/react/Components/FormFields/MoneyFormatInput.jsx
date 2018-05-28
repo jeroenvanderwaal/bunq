@@ -5,7 +5,7 @@ import {
     preferedDecimalSeparator
 } from "../../Helpers/Utils";
 
-import { withTheme } from "material-ui/styles";
+import { withTheme } from "@material-ui/core/styles";
 
 class MoneyFormatInput extends React.Component {
     render() {
@@ -14,6 +14,7 @@ class MoneyFormatInput extends React.Component {
                 required
                 margin="normal"
                 placeholder="€ 0.00"
+                min={0}
                 style={{
                     fontSize: 30,
                     ...this.props.theme.styles.moneyInput,

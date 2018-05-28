@@ -1,8 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
-import Icon from "material-ui/Icon";
+import Icon from "@material-ui/core/Icon";
 import CategoryHelper from "../../Helpers/CategoryHelper";
 import PrioritySorter from "./PrioritySorter";
+import CategoryIcon from "./CategoryIcon";
 
 const style = {
     marginTop: -20,
@@ -50,13 +51,7 @@ class CategoryIcons extends React.Component {
 
         // create a list of chips
         const chips = sortedCategories.map(category => {
-            return (
-                <div style={{ width: 32 }}>
-                    <Icon style={{ color: category.color }}>
-                        {category.icon}
-                    </Icon>
-                </div>
-            );
+            return <CategoryIcon category={category} />;
         });
 
         return <div style={{ ...style, ...this.props.style }}>{chips}</div>;

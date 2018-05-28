@@ -1,19 +1,20 @@
 import React from "react";
 import { translate } from "react-i18next";
 import { connect } from "react-redux";
-import Divider from "material-ui/Divider";
-import IconButton from "material-ui/IconButton";
-import List, {
-    ListItemText,
-    ListItem,
-    ListItemSecondaryAction
-} from "material-ui/List";
-import { CircularProgress, LinearProgress } from "material-ui/Progress";
-import RefreshIcon from "material-ui-icons/Refresh";
+import Divider from "@material-ui/core/Divider";
+import IconButton from "@material-ui/core/IconButton";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import LinearProgress from "@material-ui/core/LinearProgress";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import RefreshIcon from "@material-ui/icons/Refresh";
 
 import AccountListItem from "./AccountListItem";
 import AddAccount from "./AddAccount";
 import { formatMoney } from "../../Helpers/Utils";
+import { filterShareInviteBankResponses } from "../../Helpers/Filters";
 
 import { accountsSelectAccount, accountsUpdate } from "../../Actions/accounts";
 import { paymentInfoUpdate } from "../../Actions/payments";
@@ -21,6 +22,8 @@ import { requestResponsesUpdate } from "../../Actions/request_responses";
 import { bunqMeTabsUpdate } from "../../Actions/bunq_me_tabs";
 import { masterCardActionsUpdate } from "../../Actions/master_card_actions";
 import { requestInquiriesUpdate } from "../../Actions/request_inquiries";
+import { shareInviteBankResponsesInfoUpdate } from "../../Actions/share_invite_bank_response";
+import { shareInviteBankInquiriesInfoUpdate } from "../../Actions/share_invite_bank_inquiry";
 
 const styles = {
     list: {
@@ -56,7 +59,10 @@ class AccountList extends React.Component {
     }
 
     updateAccounts = () => {
-        this.props.accountsUpdate(this.props.user.id);
+        const userId = this.props.user.id;
+        this.props.accountsUpdate(userId);
+        this.props.shareInviteBankResponsesInfoUpdate(userId);
+        // this.props.shareInviteBankInquiriesInfoUpdate(userId);
     };
 
     /**
@@ -66,6 +72,7 @@ class AccountList extends React.Component {
         if (this.props.updateExternal) {
             this.props.updateExternal(userId, accountId);
         } else {
+            this.props.accountsUpdate(userId);
             this.props.paymentsUpdate(userId, accountId);
             this.props.bunqMeTabsUpdate(userId, accountId);
             this.props.requestResponsesUpdate(userId, accountId);
@@ -76,6 +83,7 @@ class AccountList extends React.Component {
 
     checkUpdateRequirement = (props = this.props) => {
         const {
+            accounts,
             accountsAccountId,
             paymentsAccountId,
             paymentsLoading,
@@ -85,6 +93,16 @@ class AccountList extends React.Component {
 
         if (!initialBunqConnect) {
             return;
+        }
+
+        if (accountsAccountId === false && accounts.length > 0) {
+            // get the first active account in the accounts list
+            const firstAccount = accounts.find(account => {
+                return account && account.status === "ACTIVE";
+            });
+
+            if (firstAccount && firstAccount.id)
+                this.props.selectAccount(firstAccount.id);
         }
 
         // check if the stored selected account isn't already loaded
@@ -117,7 +135,11 @@ class AccountList extends React.Component {
     };
 
     render() {
-        const { t } = this.props;
+        const {
+            t,
+            shareInviteBankResponses,
+            shareInviteBankInquiries
+        } = this.props;
 
         let accounts = [];
         if (this.props.accounts !== false) {
@@ -128,14 +150,24 @@ class AccountList extends React.Component {
                     }
                     return true;
                 })
-                .map(account => (
-                    <AccountListItem
-                        updateExternal={this.updateExternal}
-                        BunqJSClient={this.props.BunqJSClient}
-                        denseMode={this.props.denseMode}
-                        account={account}
-                    />
-                ));
+                .map(account => {
+                    const filteredResponses = shareInviteBankResponses.filter(
+                        filterShareInviteBankResponses(account.id)
+                    );
+
+                    return (
+                        <AccountListItem
+                            updateExternal={this.updateExternal}
+                            BunqJSClient={this.props.BunqJSClient}
+                            denseMode={this.props.denseMode}
+                            account={account}
+                            isJoint={
+                                account.accountType === "MonetaryAccountJoint"
+                            }
+                            shareInviteBankResponses={filteredResponses}
+                        />
+                    );
+                });
         }
 
         const totalBalance = this.props.accounts.reduce((total, account) => {
@@ -144,7 +176,7 @@ class AccountList extends React.Component {
             }
             return total;
         }, 0);
-        const formattedTotalBalance = formatMoney(totalBalance);
+        const formattedTotalBalance = formatMoney(totalBalance, true);
 
         return (
             <List dense={this.props.denseMode} style={styles.list}>
@@ -172,9 +204,12 @@ class AccountList extends React.Component {
                 {this.props.accountsLoading ? <LinearProgress /> : <Divider />}
                 {accounts}
                 {this.props.denseMode === false ? (
-                    <AddAccount
-                        displayAddAccount={this.props.displayAddAccount}
-                    />
+                    <React.Fragment>
+                        <AddAccount
+                            displayAddAccount={this.props.displayAddAccount}
+                        />
+                        <Divider />
+                    </React.Fragment>
                 ) : null}
             </List>
         );
@@ -191,11 +226,14 @@ const mapStateToProps = state => {
 
         hideBalance: state.options.hide_balance,
 
-        paymentType: state.payment_filter.type,
-
         accounts: state.accounts.accounts,
         accountsAccountId: state.accounts.selectedAccount,
         accountsLoading: state.accounts.loading,
+
+        shareInviteBankResponses:
+            state.share_invite_bank_responses.share_invite_bank_responses,
+        shareInviteBankInquiries:
+            state.share_invite_bank_inquiries.share_invite_bank_inquiries,
 
         paymentsLoading: state.payments.loading
     };
@@ -216,6 +254,10 @@ const mapDispatchToProps = (dispatch, ownProps) => {
             dispatch(bunqMeTabsUpdate(BunqJSClient, userId, accountId)),
         accountsUpdate: userId =>
             dispatch(accountsUpdate(BunqJSClient, userId)),
+        shareInviteBankResponsesInfoUpdate: userId =>
+            dispatch(shareInviteBankResponsesInfoUpdate(BunqJSClient, userId)),
+        shareInviteBankInquiriesInfoUpdate: userId =>
+            dispatch(shareInviteBankInquiriesInfoUpdate(BunqJSClient, userId)),
         selectAccount: acountId => dispatch(accountsSelectAccount(acountId))
     };
 };

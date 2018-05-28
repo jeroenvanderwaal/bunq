@@ -1,5 +1,4 @@
 import MergeApiObjects from "../Helpers/MergeApiObjects";
-import store from "store";
 
 import { STORED_PAYMENTS } from "../Actions/payments";
 
@@ -23,7 +22,6 @@ export default (state = defaultState, action) => {
                 state.account_id !== action.payload.account_id;
 
             const mergedInfo = MergeApiObjects(
-                "Payment",
                 action.payload.payments,
                 ignoreOldItems ? [] : payments
             );
@@ -63,9 +61,9 @@ export default (state = defaultState, action) => {
             };
 
         case "PAYMENTS_CLEAR":
-        case "REGISTRATION_CLEAR_API_KEY":
+        case "REGISTRATION_LOG_OUT":
+        case "REGISTRATION_CLEAR_PRIVATE_DATA":
         case "REGISTRATION_CLEAR_USER_INFO":
-            store.remove(STORED_PAYMENTS);
             return {
                 payments: [],
                 account_id: false,

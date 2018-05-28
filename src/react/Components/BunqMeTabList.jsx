@@ -1,11 +1,13 @@
 import React from "react";
 import { connect } from "react-redux";
-import List, { ListSubheader, ListItemSecondaryAction } from "material-ui/List";
-import { LinearProgress } from "material-ui/Progress";
-import Divider from "material-ui/Divider";
-import IconButton from "material-ui/IconButton";
-import Visible from "material-ui-icons/Visibility";
-import VisibleOff from "material-ui-icons/VisibilityOff";
+import List from "@material-ui/core/List";
+import ListSubheader from "@material-ui/core/ListSubheader";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import LinearProgress from "@material-ui/core/LinearProgress";
+import Divider from "@material-ui/core/Divider";
+import IconButton from "@material-ui/core/IconButton";
+import Visible from "@material-ui/icons/Visibility";
+import VisibleOff from "@material-ui/icons/VisibilityOff";
 
 import BunqMeTabListItem from "./ListItems/BunqMeTabListItem";
 import { openSnackbar } from "../Actions/snackbar";
@@ -66,7 +68,7 @@ class BunqMeTabList extends React.Component {
                     bunq.me requests - {bunqMeTabs.length}
                     <ListItemSecondaryAction>
                         <IconButton
-                            aria-label="Display or hide expired and cancelled bunq.me requests"
+                            aria-label="Display or hide expired and cancelled bunqme requests"
                             onClick={this.toggleTabVisibility}
                         >
                             {this.state.showInactiveTabs ? (

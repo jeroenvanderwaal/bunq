@@ -1,10 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
-import IconButton from "material-ui/IconButton";
-import Hidden from "material-ui/Hidden";
+import IconButton from "@material-ui/core/IconButton";
+import Hidden from "@material-ui/core/Hidden";
 const remote = require("electron").remote;
-import MenuIcon from "material-ui-icons/Menu";
-import CloseIcon from "material-ui-icons/Close";
+import MenuIcon from "@material-ui/icons/Menu";
+import CloseIcon from "@material-ui/icons/Close";
 import RestoreIcon from "./CustomSVG/Restore";
 import MaximizeIcon from "./CustomSVG/Maximize";
 import MinimizeIcon from "./CustomSVG/Minimize";
@@ -68,13 +68,9 @@ class Header extends React.Component {
         window.onresize = () => this.setState({ forceUpdate: new Date() });
     }
 
-    closeApp = () => {
-        this.mainWindow.close();
-    };
+    closeApp = () => this.mainWindow.close();
 
-    minimizeApp = () => {
-        this.mainWindow.minimize();
-    };
+    minimizeApp = () => this.mainWindow.minimize();
 
     maximizeRestoreApp = () => {
         if (this.mainWindow.isMaximized()) {
@@ -86,23 +82,26 @@ class Header extends React.Component {
     };
 
     render() {
+        // only show buttons on windows/linux and when native frame is disabled
         const displayButtons = !IsDarwin() && this.props.nativeFrame === false;
+
+        // if not on macOS or native frame is used we display the icon on the left
+        const menuIconButtonStyle =
+            !IsDarwin() || this.props.nativeFrame === true
+                ? styles.headerMenuBtn
+                : styles.headerMenuBtnDarwin;
+
         // the actual menu button
         const menuButton = (
             <IconButton
                 aria-label="view main drawer"
                 onClick={this.props.openDrawer}
-                style={
-                    !IsDarwin() ? (
-                        styles.headerMenuBtn
-                    ) : (
-                        styles.headerMenuBtnDarwin
-                    )
-                }
+                style={menuIconButtonStyle}
             >
                 <MenuIcon />
             </IconButton>
         );
+
         // wrap it in a hidden wrapper in case of sticky menu mode
         const wrappedButton = this.props.stickyMenu ? (
             <Hidden mdUp>{menuButton}</Hidden>

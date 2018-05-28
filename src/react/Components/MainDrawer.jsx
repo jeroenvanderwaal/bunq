@@ -1,23 +1,29 @@
 import React from "react";
 import { translate } from "react-i18next";
 import { connect } from "react-redux";
-import { withStyles } from "material-ui/styles";
+import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
-import Drawer from "material-ui/Drawer";
-import Hidden from "material-ui/Hidden";
-import Avatar from "material-ui/Avatar";
-import Divider from "material-ui/Divider";
-import List, { ListItem, ListItemText, ListItemIcon } from "material-ui/List";
+import Drawer from "@material-ui/core/Drawer";
+import Hidden from "@material-ui/core/Hidden";
+import Avatar from "@material-ui/core/Avatar";
+import Divider from "@material-ui/core/Divider";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import List from "@material-ui/core/List";
 
-import ArrowUpwardIcon from "material-ui-icons/ArrowUpward";
-import ArrowDownwardIcon from "material-ui-icons/ArrowDownward";
-import HomeIcon from "material-ui-icons/Home";
-import SettingsIcon from "material-ui-icons/Settings";
-import ShareIcon from "material-ui-icons/Share";
-import TimeLineIcon from "material-ui-icons/Timeline";
-import CardIcon from "material-ui-icons/CreditCard";
-import Bookmark from "material-ui-icons/Bookmark";
-import FileUpload from "material-ui-icons/FileUpload";
+import ContactsIcon from "@material-ui/icons/Contacts";
+import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
+import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
+import HomeIcon from "@material-ui/icons/Home";
+import SettingsIcon from "@material-ui/icons/Settings";
+import ShareIcon from "@material-ui/icons/Share";
+import TimeLineIcon from "@material-ui/icons/Timeline";
+import CardIcon from "@material-ui/icons/CreditCard";
+import Bookmark from "@material-ui/icons/Bookmark";
+import CreateIcon from "@material-ui/icons/Create";
+import FileUpload from "@material-ui/icons/FileUpload";
+import EventIcon from "@material-ui/icons/Event";
 
 import NavLink from "./Routing/NavLink";
 import ListItemWrapper from "./ListItemWrapper";
@@ -127,11 +133,10 @@ class MainDrawer extends React.Component {
                       text={"Cards"}
                       location={this.props.location}
                   />,
-                  <Divider />,
                   <ListItemWrapper
-                      to="/stats"
-                      icon={TimeLineIcon}
-                      text={"Stats"}
+                      to="/scheduled-payments"
+                      icon={EventIcon}
+                      text={"Scheduled payments"}
                       location={this.props.location}
                   />,
                   <ListItemWrapper
@@ -140,31 +145,32 @@ class MainDrawer extends React.Component {
                       text={"Exports"}
                       location={this.props.location}
                   />,
+                  <Divider />,
+                  <ListItemWrapper
+                      to="/stats"
+                      icon={TimeLineIcon}
+                      text={"Stats"}
+                      location={this.props.location}
+                  />,
+                  <ListItemWrapper
+                      to="/contacts"
+                      icon={ContactsIcon}
+                      text={"Contacts"}
+                      location={this.props.location}
+                  />,
                   <ListItemWrapper
                       to="/category-dashboard"
                       icon={Bookmark}
                       text={"Categories"}
                       location={this.props.location}
+                  />,
+                  <ListItemWrapper
+                      to="/rules-dashboard"
+                      icon={CreateIcon}
+                      text="Category rules"
+                      location={this.props.location}
                   />
               ];
-        {
-            /*<ListItemWrapper*/
-        }
-        {
-            /*to="/rules-dashboard"*/
-        }
-        {
-            /*icon={CreateIcon}*/
-        }
-        {
-            /*text="Category rules"*/
-        }
-        {
-            /*location={this.props.location}*/
-        }
-        {
-            /*/>*/
-        }
 
         const drawerList = (
             <List style={styles.list}>

@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
-import Button from "material-ui/Button";
-import RefreshIcon from "material-ui-icons/Refresh";
-import { CircularProgress } from "material-ui/Progress";
+import Button from "@material-ui/core/Button";
+import RefreshIcon from "@material-ui/icons/Refresh";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import { paymentInfoUpdate } from "../Actions/payments";
 import { requestResponsesUpdate } from "../Actions/request_responses";
@@ -100,7 +100,11 @@ class LoadOlderButton extends React.Component {
                         onClick={this.update}
                         disabled={loadingState}
                     >
-                        <RefreshIcon />
+                        {this.props.buttonContent ? (
+                            this.props.buttonContent
+                        ) : (
+                            <RefreshIcon />
+                        )}
                     </Button>
                 )}
             </div>
@@ -110,6 +114,7 @@ class LoadOlderButton extends React.Component {
 
 LoadOlderButton.defaultProps = {
     updateExternal: false,
+    buttonContent: false,
     wrapperStyle: {},
     loaderStyle: {},
     buttonStyle: {}

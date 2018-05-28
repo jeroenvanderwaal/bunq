@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
-import Snackbar from "material-ui/Snackbar";
-import Slide from "material-ui/transitions/Slide";
+import Snackbar from "@material-ui/core/Snackbar";
+import Slide from "@material-ui/core/Slide";
 const Transition = props => <Slide direction={"down"} {...props} />;
 
 // redux actions
@@ -26,7 +26,7 @@ class MainSnackbar extends React.PureComponent {
                 open={this.props.snackbarOpen}
                 message={this.props.snackbarMessage}
                 autoHideDuration={this.props.snackbarDuration}
-                transition={Transition}
+                TransitionComponent={Transition}
                 anchorOrigin={{ vertical: "top", horizontal: "right" }}
                 onClose={this.props.closeSnackbar}
             />

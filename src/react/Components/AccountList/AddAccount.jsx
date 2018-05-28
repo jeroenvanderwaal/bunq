@@ -1,8 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
-import { ListItem, ListItemText } from "material-ui/List";
-import Avatar from "material-ui/Avatar";
-import AddBoxIcon from "material-ui-icons/AddBox";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import Avatar from "@material-ui/core/Avatar";
+import AddBoxIcon from "@material-ui/icons/AddBox";
 
 import NavLink from "../../Components/Routing/NavLink";
 import { translate } from "react-i18next";
@@ -22,14 +23,12 @@ class AddAccount extends React.Component {
 
     render() {
         return (
-            <ListItem button to={`/add-account`} component={NavLink}>
+            <ListItem button to={`/new-account`} component={NavLink}>
                 <Avatar style={styles.bigAvatar}>
                     <AddBoxIcon />
                 </Avatar>
                 <ListItemText
-                    secondary={this.props.t(
-                        "Open a new bank account"
-                    )}
+                    secondary={this.props.t("Open a new bank account")}
                 />
             </ListItem>
         );

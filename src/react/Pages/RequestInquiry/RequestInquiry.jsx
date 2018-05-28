@@ -4,12 +4,13 @@ import Helmet from "react-helmet";
 import { translate } from "react-i18next";
 import EmailValidator from "email-validator";
 
-import Grid from "material-ui/Grid";
-import TextField from "material-ui/TextField";
-import Paper from "material-ui/Paper";
-import Collapse from "material-ui/transitions/Collapse";
-import Switch from "material-ui/Switch";
-import { FormControl, FormControlLabel } from "material-ui/Form";
+import Grid from "@material-ui/core/Grid";
+import TextField from "@material-ui/core/TextField";
+import Paper from "@material-ui/core/Paper";
+import Collapse from "@material-ui/core/Collapse";
+import Switch from "@material-ui/core/Switch";
+import FormControl from "@material-ui/core/FormControl";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 
 import AccountSelectorDialog from "../../Components/FormFields/AccountSelectorDialog";
 import TargetSelection from "../../Components/FormFields/TargetSelection";
@@ -23,6 +24,7 @@ import AllowBunqMe from "./Options/AllowBunqMe";
 
 import { openSnackbar } from "../../Actions/snackbar";
 import { requestInquirySend } from "../../Actions/request_inquiry";
+import {getInternationalFormat, isValidPhonenumber} from "../../Helpers/PhoneLib";
 
 const styles = {
     payButton: {
@@ -79,11 +81,17 @@ class RequestInquiry extends React.Component {
             targets: [],
 
             // defines which type is used
-            targetType: "EMAIL"
+            targetType: "CONTACT"
         };
     }
 
     componentDidMount() {
+        const searchParams = new URLSearchParams(this.props.location.search);
+        if (searchParams.has("amount")) {
+            const amount = parseFloat(searchParams.get("amount"));
+            this.setState({ amount: amount >= 0 ? amount : amount * -1 });
+        }
+
         // set the current account selected on the dashboard as the active one
         this.props.accounts.map((account, accountKey) => {
             if (this.props.selectedAccount === account.id) {
@@ -121,6 +129,14 @@ class RequestInquiry extends React.Component {
                     validForm: false
                 });
             }
+        );
+    };
+    handleChangeDirect = name => value => {
+        this.setState(
+            {
+                [name]: value
+            },
+            this.validateForm
         );
     };
     handleChange = name => event => {
@@ -179,7 +195,12 @@ class RequestInquiry extends React.Component {
                 const currentTargets = [...this.state.targets];
 
                 let foundDuplicate = false;
-                const targetValue = this.state.target.trim();
+                let targetValue = this.state.target.trim();
+
+                if (isValidPhonenumber(targetValue)) {
+                    // valid phone number, we must format as international
+                    targetValue = getInternationalFormat(targetValue);
+                }
 
                 // check for duplicates in existing target list
                 currentTargets.map(newTarget => {
@@ -223,11 +244,12 @@ class RequestInquiry extends React.Component {
         // check if the target is valid based onthe targetType
         let targetErrorCondition = false;
         switch (targetType) {
-            case "EMAIL":
-                targetErrorCondition = !EmailValidator.validate(target);
-                break;
-            case "PHONE":
-                targetErrorCondition = target.length < 5 || target.length > 64;
+            case "CONTACT":
+                const validEmail = EmailValidator.validate(target);
+                const validPhone = isValidPhonenumber(target);
+
+                // only error if both are false
+                targetErrorCondition = !validEmail && !validPhone;
                 break;
         }
 
@@ -265,11 +287,12 @@ class RequestInquiry extends React.Component {
         // check if the target is valid based onthe targetType
         let targetErrorCondition = false;
         switch (targetType) {
-            case "EMAIL":
-                targetErrorCondition = !EmailValidator.validate(target);
-                break;
-            case "PHONE":
-                targetErrorCondition = target.length < 5 || target.length > 64;
+            case "CONTACT":
+                const validEmail = EmailValidator.validate(target);
+                const validPhone = isValidPhonenumber(target);
+
+                // only error if both are false
+                targetErrorCondition = !validEmail && !validPhone;
                 break;
             default:
         }
@@ -326,17 +349,24 @@ class RequestInquiry extends React.Component {
             // check if the target is valid based onthe targetType
             let targetInfo = false;
             switch (target.type) {
-                case "EMAIL":
-                    targetInfo = {
-                        type: "EMAIL",
-                        value: target.value.trim()
-                    };
-                    break;
-                case "PHONE":
-                    targetInfo = {
-                        type: "PHONE_NUMBER",
-                        value: target.value.trim()
-                    };
+                case "CONTACT":
+                    const validEmail = EmailValidator.validate(target.value);
+                    const validPhone = isValidPhonenumber(target.value);
+
+                    if (validEmail) {
+                        targetInfo = {
+                            type: "EMAIL",
+                            value: target.value.trim()
+                        };
+                    } else if (validPhone) {
+                        const formattedNumber = getInternationalFormat(target.value);
+                        if (formattedNumber) {
+                            targetInfo = {
+                                type: "PHONE_NUMBER",
+                                value: formattedNumber
+                            };
+                        }
+                    }
                     break;
                 default:
                     // invalid type
@@ -384,7 +414,7 @@ class RequestInquiry extends React.Component {
                     <title>{`BunqDesktop - ${t("Pay")}`}</title>
                 </Helmet>
 
-                <Grid item xs={12} sm={10} md={8} lg={6}>
+                <Grid item xs={12} sm={8} lg={6} xl={4}>
                     <Paper style={styles.paper}>
                         <TypographyTranslate variant="headline">
                             Request Payment

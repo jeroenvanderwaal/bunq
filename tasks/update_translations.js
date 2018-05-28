@@ -5,7 +5,8 @@ const awaiting = require("awaiting");
 const packageInfo = require("../package.json");
 const SUPPORTED_LANGUAGES = packageInfo.supported_languages;
 
-let googleTranslate = new GoogleTranslate();
+// let googleTranslate = new GoogleTranslate();
+let googleTranslate;
 
 const LOCALES_DIR = path.join(__dirname, "../src/react/Locales");
 
@@ -46,6 +47,10 @@ const translateWord = async (languageKey, textKey, textValue) => {
  */
 const checkCredentials = async () => {
     return new Promise(resolve => {
+        if(!googleTranslate){
+            resolve();
+        }
+
         // check the following url on how to set this up
         // https://github.com/googleapis/nodejs-translate#before-you-begin
         googleTranslate.getCredentials((error, result) => {
@@ -63,9 +68,6 @@ const checkCredentials = async () => {
             }
             resolve();
         });
-
-        // nothing to do
-        if (!googleTranslate) process.exit();
     });
 };
 
@@ -129,8 +131,8 @@ const start = async () => {
                 // set translated data in localeData for this language
                 localeData[missingTranslationKey] = result.translated;
 
-                // delay to prevent hitting the api limit
-                await awaiting.delay(500);
+                // delay to prevent hitting the api limit if translations are enabled
+                await awaiting.delay(googleTranslate? 500: 10);
             }
         );
 

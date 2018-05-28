@@ -1,25 +1,38 @@
-import fs from "fs";
 import url from "url";
 import path from "path";
 import log from "electron-log";
 import electron from "electron";
 import settings from "electron-settings";
-import { app, Menu, Tray, nativeImage } from "electron";
+import { app, Menu, Tray, nativeImage, ipcMain, BrowserWindow } from "electron";
 import { devMenuTemplate } from "./menu/dev_menu_template";
 import { editMenuTemplate } from "./menu/edit_menu_template";
 import createWindow from "./helpers/window";
 import registerShortcuts from "./helpers/shortcuts";
 import registerTouchBar from "./helpers/touchbar";
 import changePage from "./helpers/react_navigate";
-import defaultConfig from "./helpers/default_config";
+import settingsHelper from "./helpers/settings";
+import oauth from "./helpers/oauth";
 
+// import i18n from "./i18n-background";
 import env from "./env";
 
+// disable security warnings since we need cross-origin requests
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 1;
+
+// // use english by default
+// i18n.changeLanguage("en");
+//
+// // listen for changes in language in the client
+// ipcMain.on("change-language", (event, arg) => {
+//     i18n.changeLanguage(arg);
+// });
+
+// listen for changes in settings path
+ipcMain.on("change-settings-path", (event, newPath) => {
+    settingsHelper.savePath(newPath);
+});
+
 const userDataPath = app.getPath("userData");
-const SETTINGS_LOCATION_FILE = path.normalize(
-    `${userDataPath}${path.sep}..${path.sep}BunqDesktop${path.sep}${path.sep}SETTINGS_LOCATION`
-);
-const DEFAULT_SETTINGS_LOCATION = `${userDataPath}${path.sep}settings.json`;
 
 // hide/show different native menus based on env
 const setApplicationMenu = () => {
@@ -40,39 +53,6 @@ const getWindowUrl = fileName => {
     });
 };
 
-// stores the file location of our settings file
-const getSettingsLocation = () => {
-    // check if the parent folder exists
-    if (fs.existsSync(path.dirname(SETTINGS_LOCATION_FILE))) {
-        try {
-            // check if the settings lock file exists
-            if (!fs.existsSync(SETTINGS_LOCATION_FILE)) {
-                // create a default file
-                fs.writeFileSync(
-                    SETTINGS_LOCATION_FILE,
-                    DEFAULT_SETTINGS_LOCATION
-                );
-            }
-            // return the lock file contents
-            return fs.readFileSync(SETTINGS_LOCATION_FILE).toString();
-        } catch (ex) {}
-    }
-
-    // create the settings lock file
-    fs.writeFileSync(SETTINGS_LOCATION_FILE, DEFAULT_SETTINGS_LOCATION);
-
-    // check if the default settings file exists
-    if (!fs.existsSync(DEFAULT_SETTINGS_LOCATION)) {
-        // fill the settings file with our default config
-        fs.writeFileSync(
-            DEFAULT_SETTINGS_LOCATION,
-            JSON.stringify(defaultConfig())
-        );
-    }
-
-    return DEFAULT_SETTINGS_LOCATION;
-};
-
 // Save userData in separate folders for each environment
 if (env.name !== "production") {
     app.setPath("userData", `${userDataPath} (${env.name})`);
@@ -80,19 +60,20 @@ if (env.name !== "production") {
 
 // setup the logger
 log.transports.file.appName = "BunqDesktop";
-log.transports.file.level = env.name === "development" ? "debug" : "warn";
+log.transports.file.level = "debug";
+log.transports.file.maxSize = 512 * 1024;
 log.transports.file.format = "{h}:{i}:{s}:{ms} {text}";
 log.transports.file.file = `${userDataPath}${path.sep}BunqDesktop.${env.name}.log.txt`;
 
 // hot reloading
-if (process.env.NODE_ENV === "DEVELOPMENT") {
+if (process.env.NODE_ENV === "development") {
     require("electron-reload")(
         path.join(__dirname, `..${path.sep}app${path.sep}**`)
     );
 }
 
 // set the correct path before the app loads
-settings.setPath(getSettingsLocation());
+settings.setPath(settingsHelper.loadPath());
 
 app.on("ready", () => {
     setApplicationMenu();
@@ -114,7 +95,7 @@ app.on("ready", () => {
     mainWindow.loadURL(getWindowUrl("app.html"));
 
     registerShortcuts(mainWindow, app);
-    registerTouchBar(mainWindow);
+    registerTouchBar(mainWindow, null);
 
     if (env.name === "development") {
         mainWindow.openDevTools();
@@ -132,23 +113,28 @@ app.on("ready", () => {
         const tray = new Tray(trayIcon);
         const contextMenu = Menu.buildFromTemplate([
             {
+                // label: i18n.t("Dashboard"),
                 label: "Dashboard",
                 click: () => changePage(mainWindow, "/")
             },
             {
+                // label: i18n.t("Pay"),
                 label: "Pay",
                 click: () => changePage(mainWindow, "/pay")
             },
             {
+                // label: i18n.t("Request"),
                 label: "Request",
                 click: () => changePage(mainWindow, "/request")
             },
             {
+                // label: i18n.t("Cards"),
                 label: "Cards",
                 click: () => changePage(mainWindow, "/card")
             },
             { type: "separator" },
             {
+                // label: i18n.t("Quit"),
                 label: "Quit",
                 click: () => app.quit()
             }
@@ -164,6 +150,7 @@ app.on("ready", () => {
         });
     };
 
+    // handle minimize event to minimze to tray when requried
     mainWindow.on("minimize", function(event) {
         const minimizeToTray = !!settings.get("MINIMIZE_TO_TRAY");
         if (minimizeToTray) {
@@ -173,6 +160,19 @@ app.on("ready", () => {
         }
     });
 
+    // handle app command events like mouse-back/mouse-forward
+    mainWindow.on("app-command", function(e, cmd) {
+        switch (cmd) {
+            case "browser-backward":
+                mainWindow.webContents.send("history-backward");
+                break;
+            case "browser-forward":
+                mainWindow.webContents.send("history-forward");
+                break;
+        }
+    });
+
+    // if the mainwindow closes, all windows should close
     mainWindow.on("close", function(event) {
         app.quit();
     });
@@ -185,6 +185,9 @@ app.on("ready", () => {
     electron.powerMonitor.on("suspend", () => {
         log.debug("suspend");
     });
+
+    // register oauth handlers
+    oauth(mainWindow);
 });
 
 app.on("window-all-closed", () => {
