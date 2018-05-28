@@ -1,6 +1,6 @@
 import React from "react";
 import { translate } from "react-i18next";
-import withStyles from "@material-ui/core/styles/withStyles";
+import { withStyles } from "@material-ui/core/styles";
 import Dialog from "@material-ui/core/Dialog";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
@@ -59,7 +59,7 @@ class UploadFullscreen extends React.PureComponent {
                 open={this.props.open}
                 onClick={this.props.handleRequestClose}
                 onClose={this.props.handleRequestClose}
-                transition={Transition}
+                TransitionComponent={Transition}
             >
                 <div className={classes.content}>
                     <div className={classes.contentWrapper}>
