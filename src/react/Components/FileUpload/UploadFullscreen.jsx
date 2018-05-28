@@ -1,10 +1,10 @@
 import React from "react";
 import { translate } from "react-i18next";
-import withStyles from "material-ui/styles/withStyles";
-import Dialog from "material-ui/Dialog";
-import Button from "material-ui/Button";
-import Typography from "material-ui/Typography";
-import Slide from "material-ui/transitions/Slide";
+import withStyles from "@material-ui/core/styles/withStyles";
+import Dialog from "@material-ui/core/Dialog";
+import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
+import Slide from "@material-ui/core/Slide";
 import FileDropZone from "./FileDropZone";
 
 const Transition = props => <Slide direction={"up"} {...props} />;
@@ -51,7 +51,7 @@ class UploadFullscreen extends React.PureComponent {
     };
 
     render() {
-        const { classes,t } = this.props;
+        const { classes, t } = this.props;
         return (
             <Dialog
                 fullScreen

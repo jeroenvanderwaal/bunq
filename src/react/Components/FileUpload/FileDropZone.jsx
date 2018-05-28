@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "material-ui/styles";
-import FileUpload from "material-ui-icons/FileUpload";
+import { withStyles } from "@material-ui/core/styles";
+import FileUpload from "@material-ui/icons/FileUpload";
 import Dropzone from "react-dropzone";
 
 const contentSize = 320;
