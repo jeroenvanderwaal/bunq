@@ -52,7 +52,6 @@ class Profile extends React.Component {
             loading: false,
 
             public_nick_name: "",
-
             address_main: {
                 city: "",
                 country: "",
@@ -70,12 +69,16 @@ class Profile extends React.Component {
                 street: ""
             },
 
+            credentialPasswordIpLoading: false,
+            credentialPasswordIps: [],
+
             totalBalance: 0
         };
     }
 
     componentDidMount() {
         this.userToState();
+        this.getCredentialIps();
 
         const totalBalance = this.calculateTotalBalance();
         this.setState({
@@ -173,13 +176,46 @@ class Profile extends React.Component {
             });
     };
 
+    getCredentialIps = () => {
+        const { credentialPasswordIpLoading } = this.state;
+        const { t, user, BunqJSClient } = this.props;
+        const errorMessage = t("We failed to update your user information");
+        this.setState({ credentialPasswordIpLoading: true });
+
+        if (!credentialPasswordIpLoading) {
+            BunqJSClient.api.credentialPasswordIp
+                .list(user.id)
+                .then(response => {
+                    console.log(response);
+                    this.setState({ credentialPasswordIpLoading: false, credentialPasswordIps: response });
+                })
+                .catch(error => {
+                    this.setState({ credentialPasswordIpLoading: false });
+                    this.props.BunqErrorHandler(error, errorMessage);
+                });
+        }
+    };
+
     render() {
         const { t, userType, userLoading } = this.props;
         const { totalBalance } = this.state;
 
         let content = null;
-        if (userLoading === false && this.state.loading === false) {
+        if (userLoading || this.state.loading) {
+            content = (
+                <Paper style={styles.paper}>
+                    <Grid container spacing={24} justify={"center"}>
+                        <Grid item xs={12}>
+                            <div style={{ textAlign: "center" }}>
+                                <CircularProgress />
+                            </div>
+                        </Grid>
+                    </Grid>
+                </Paper>
+            );
+        } else {
             let businessInfo = null;
+            let credentialPasswordIpInfo = null;
             if (userType === "UserCompany") {
                 const hasSafeKeepingFee = totalBalance > 100000;
 
@@ -222,6 +258,42 @@ class Profile extends React.Component {
                                 })}
                             </TableBody>
                         </Table>
+                    );
+                }
+
+                if (this.state.credentialPasswordIps.length > 0) {
+                    const credentialRows = this.state.credentialPasswordIps.map(credentialPasswordIpItem => {
+                        const credentialPasswordIp = credentialPasswordIpItem.CredentialPasswordIp;
+                        return (
+                            <TableRow key={`days${days}`}>
+                                <TableCell component="th" scope="row">
+                                    {days}
+                                </TableCell>
+                                <TableCell numeric>{formatMoney(totalPayment)}</TableCell>
+                            </TableRow>
+                        );
+                    });
+
+                    credentialPasswordIpInfo = (
+                        <Paper style={styles.paper}>
+                            <Grid container spacing={16} justify="center">
+                                <Grid item xs={12}>
+                                    <TranslateTypography variant="subtitle1">Permitted IP list</TranslateTypography>
+                                </Grid>
+
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>{t("Days")}</TableCell>
+                                            <TableCell numeric>{t("Estimated total cost")}</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>{credentialRows}</TableBody>
+                                </Table>
+
+                                <Grid item xs={12} />
+                            </Grid>
+                        </Paper>
                     );
                 }
 
@@ -306,19 +378,8 @@ class Profile extends React.Component {
                     </Paper>
 
                     {businessInfo}
+                    {credentialPasswordIpInfo}
                 </React.Fragment>
-            );
-        } else {
-            content = (
-                <Paper style={styles.paper}>
-                    <Grid container spacing={24} justify={"center"}>
-                        <Grid item xs={12}>
-                            <div style={{ textAlign: "center" }}>
-                                <CircularProgress />
-                            </div>
-                        </Grid>
-                    </Grid>
-                </Paper>
             );
         }
 
